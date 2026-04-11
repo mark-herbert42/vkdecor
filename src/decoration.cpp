@@ -54,9 +54,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
     wf::option_wrapper_t<std::string> button_layout{"pixdecor/button_layout"};
     wf::option_wrapper_t<std::string> ignore_views_string{"pixdecor/ignore_views"};
     wf::option_wrapper_t<std::string> always_decorate_string{"pixdecor/always_decorate"};
-    wf::option_wrapper_t<std::string> effect_type{"pixdecor/effect_type"};
     wf::option_wrapper_t<std::string> overlay_engine{"pixdecor/overlay_engine"};
-    wf::option_wrapper_t<bool> effect_animate{"pixdecor/animate"};
     wf::option_wrapper_t<int> rounded_corner_radius{"pixdecor/rounded_corner_radius"};
     wf::option_wrapper_t<int> shadow_radius{"pixdecor/shadow_radius"};
     wf::option_wrapper_t<wf::color_t> shadow_color{"pixdecor/shadow_color"};
@@ -148,10 +146,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
     wf::signal::connection_t<wf::output_added_signal> on_output_added =
         [=] (wf::output_added_signal *ev)
     {
-        if (effect_animate || (std::string(effect_type) == "smoke") || (std::string(effect_type) == "ink"))
-        {
-            ev->output->render->add_effect(&pre_hook, wf::OUTPUT_EFFECT_PRE);
-        }
+
     };
 
     wf::signal::connection_t<wf::output_removed_signal> on_output_removed =
@@ -389,20 +384,9 @@ class wayfire_pixdecor : public wf::plugin_interface_t
             }
         };
 
-        if (std::string(effect_type) != "none")
-        {
-            for (auto& o : wf::get_core().output_layout->get_outputs())
-            {
-                o->render->add_effect(&pre_hook, wf::OUTPUT_EFFECT_PRE);
-            }
-
-            hook_set = true;
-        }
 
         titlebar.set_callback([=] {recreate_frames();});
-        effect_type.set_callback([=] {option_changed_cb(false, false);});
         overlay_engine.set_callback([=] {option_changed_cb(true, false);recreate_frames();});
-        effect_animate.set_callback([=] {option_changed_cb(false, false);});
         button_color.set_callback([=] {recreate_frames();});
         button_line_thickness.set_callback([=] {recreate_frames();});
         button_size.set_callback([=] {recreate_frames();});
@@ -559,19 +543,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
 
     void option_changed_cb(bool resize_decorations, bool recreate_decorations)
     {
-        if (effect_animate || (std::string(effect_type) == "smoke") || (std::string(effect_type) == "ink"))
-        {
-            if (!hook_set)
-            {
-                for (auto& o : wf::get_core().output_layout->get_outputs())
-                {
-                    o->render->add_effect(&pre_hook, wf::OUTPUT_EFFECT_PRE);
-                }
 
-                hook_set = true;
-            }
-        } else
-        {
             if (hook_set)
             {
                 for (auto& o : wf::get_core().output_layout->get_outputs())
@@ -581,7 +553,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
 
                 hook_set = false;
             }
-        }
+
 
         if (recreate_decorations)
         {

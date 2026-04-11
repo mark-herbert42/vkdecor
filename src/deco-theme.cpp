@@ -115,7 +115,7 @@ void pixdecor_theme_t::set_maximize(bool state)
 void pixdecor_theme_t::render_background(const wf::scene::render_instruction_t& data,
     wf::geometry_t rectangle, bool active, wf::pointf_t p)
 {
-    if ((std::string(effect_type) == "none") && (std::string(overlay_engine) == "none"))
+    if (std::string(overlay_engine) == "none")
     {
         data.pass->custom_gles_subpass(data.target, [&]
         {
