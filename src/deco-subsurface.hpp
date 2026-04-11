@@ -6,6 +6,7 @@
 #include <wayfire/signal-definitions.hpp>
 #include <wayfire/toplevel-view.hpp>
 #include <wayfire/scene-render.hpp>
+#include <wayfire/txn/transaction-manager.hpp>
 
 static std::string custom_data_name = "wf-decoration-shadow-margin";
 
@@ -56,6 +57,8 @@ class simple_decorator_t : public wf::custom_data_t
     void update_animation();
     int shadow_thickness;
 };
+
+void schedule_transaction(wf::txn::transaction_object_sptr object);
 }
 }
 
