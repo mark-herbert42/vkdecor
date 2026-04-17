@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <wayfire>
 	<plugin name="vkdecor">
-		<_short>Pix Decoration</_short>
-		<_long>A highly configurable and optionally fancy decorator plugin for wayfire.</_long>
+		<_short>Vk Decoration</_short>
+		<_long>Vulkan decorator with shadows and rounded corners effects  for wayfire.</_long>
 		<category>Effects</category>
 		<group>
 			<_short>General</_short>
@@ -106,10 +106,6 @@
 				<desc>
 					<value>rounded_corners</value>
 					<_name>Rounded Corners</_name>
-				</desc>
-				<desc>
-					<value>beveled_glass</value>
-					<_name>Beveled Glass</_name>
 				</desc>
 			</option>
 			<option name="rounded_corner_radius" type="int">

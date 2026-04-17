@@ -1,7 +1,7 @@
 # vkdecor
 ![vkdecor](https://github.com/soreau/vkdecor/assets/1450125/af891554-8eeb-4769-b571-fa587afd8350)
 
-A highly configurable decorator plugin for wayfire, vkdecor features antialiased rounded corners with shadows and optional animated effects.
+A decorator plugin for wayfire, vkdecor is forked from pixdecor and keep only  antialiased rounded corners with shadows effects from it.
 
 ## Installing
 
