@@ -29,7 +29,7 @@ class wf_shadow_margin_t : public wf::custom_data_t
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
 class simple_decoration_node_t;
 /**

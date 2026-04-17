@@ -32,17 +32,17 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
-wf::option_wrapper_t<int> shadow_radius{"pixdecor/shadow_radius"};
-wf::option_wrapper_t<std::string> titlebar_opt{"pixdecor/titlebar"};
-wf::option_wrapper_t<int> csd_titlebar_height{"pixdecor/csd_titlebar_height"};
-wf::option_wrapper_t<bool> enable_shade{"pixdecor/enable_shade"};
-wf::option_wrapper_t<std::string> title_font{"pixdecor/title_font"};
-wf::option_wrapper_t<std::string> overlay_engine{"pixdecor/overlay_engine"};
-wf::option_wrapper_t<bool> maximized_borders{"pixdecor/maximized_borders"};
-wf::option_wrapper_t<bool> maximized_shadows{"pixdecor/maximized_shadows"};
-wf::option_wrapper_t<int> title_text_align{"pixdecor/title_text_align"};
+wf::option_wrapper_t<int> shadow_radius{"vkdecor/shadow_radius"};
+wf::option_wrapper_t<std::string> titlebar_opt{"vkdecor/titlebar"};
+wf::option_wrapper_t<int> csd_titlebar_height{"vkdecor/csd_titlebar_height"};
+wf::option_wrapper_t<bool> enable_shade{"vkdecor/enable_shade"};
+wf::option_wrapper_t<std::string> title_font{"vkdecor/title_font"};
+wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
+wf::option_wrapper_t<bool> maximized_borders{"vkdecor/maximized_borders"};
+wf::option_wrapper_t<bool> maximized_shadows{"vkdecor/maximized_shadows"};
+wf::option_wrapper_t<int> title_text_align{"vkdecor/title_text_align"};
 
 void schedule_transaction(wf::txn::transaction_object_sptr object)
 {
@@ -101,8 +101,8 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
     } title_texture;
 
   public:
-    pixdecor_theme_t theme;
-    pixdecor_layout_t layout;
+    vkdecor_theme_t theme;
+    vkdecor_layout_t layout;
     wf::region_t cached_region;
 
     wf::dimensions_t size;
@@ -389,17 +389,17 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
         }
     }
 
-    std::shared_ptr<pixdecor_shade> ensure_transformer(wayfire_view view, int titlebar_height)
+    std::shared_ptr<vkdecor_shade> ensure_transformer(wayfire_view view, int titlebar_height)
     {
         auto tmgr = view->get_transformed_node();
-        if (auto tr = tmgr->get_transformer<pixdecor_shade>(shade_transformer_name))
+        if (auto tr = tmgr->get_transformer<vkdecor_shade>(shade_transformer_name))
         {
             return tr;
         }
 
-        auto node = std::make_shared<pixdecor_shade>(view, titlebar_height);
+        auto node = std::make_shared<vkdecor_shade>(view, titlebar_height);
         tmgr->add_transformer(node, wf::TRANSFORMER_2D, shade_transformer_name);
-        auto tr = tmgr->get_transformer<pixdecor_shade>(shade_transformer_name);
+        auto tr = tmgr->get_transformer<vkdecor_shade>(shade_transformer_name);
 
         return tr;
     }
@@ -422,7 +422,7 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
         } else
         {
             if (auto tr =
-                    view->get_transformed_node()->get_transformer<pixdecor_shade>(
+                    view->get_transformed_node()->get_transformer<vkdecor_shade>(
                         shade_transformer_name))
             {
                 tr->set_titlebar_height(titlebar_height);
@@ -431,7 +431,7 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
         }
     }
 
-    void handle_action(pixdecor_layout_t::action_response_t action)
+    void handle_action(vkdecor_layout_t::action_response_t action)
     {
         if (auto view = _view.lock())
         {
@@ -501,7 +501,7 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
         {
             auto size = wf::dimensions(view->get_pending_geometry());
             layout.resize(size.width, size.height);
-            wf::pixdecor::schedule_transaction(view->toplevel());
+            wf::vkdecor::schedule_transaction(view->toplevel());
         }
     }
 
@@ -551,7 +551,7 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
             }
 
             if (auto tr =
-                    view->get_transformed_node()->get_transformer<pixdecor_shade>(
+                    view->get_transformed_node()->get_transformer<vkdecor_shade>(
                         shade_transformer_name))
             {
                 tr->set_titlebar_height(current_titlebar);
@@ -669,7 +669,7 @@ wf::decoration_margins_t simple_decorator_t::get_margins(const wf::toplevel_stat
 
     double shade_progress = 0.0;
     if (auto tr =
-            view->get_transformed_node()->get_transformer<pixdecor_shade>(
+            view->get_transformed_node()->get_transformer<vkdecor_shade>(
                 shade_transformer_name))
     {
         tr->set_titlebar_height(titlebar);

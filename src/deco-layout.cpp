@@ -8,7 +8,7 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
 /**
  * Represents an area of the decoration which reacts to input events.
@@ -26,7 +26,7 @@ decoration_area_t::decoration_area_t(decoration_area_type_t type, wf::geometry_t
  */
 decoration_area_t::decoration_area_t(wf::geometry_t g,
     std::function<void(wlr_box)> damage_callback,
-    pixdecor_theme_t& theme)
+    vkdecor_theme_t& theme)
 {
     this->type     = DECORATION_AREA_BUTTON;
     this->geometry = g;
@@ -64,7 +64,7 @@ decoration_area_type_t decoration_area_t::get_type() const
     return type;
 }
 
-pixdecor_layout_t::pixdecor_layout_t(pixdecor_theme_t& th,
+vkdecor_layout_t::vkdecor_layout_t(vkdecor_theme_t& th,
     std::function<void(wlr_box)> callback) :
 
     titlebar_size(th.get_title_height()),
@@ -73,19 +73,19 @@ pixdecor_layout_t::pixdecor_layout_t(pixdecor_theme_t& th,
     damage_callback(callback)
 {}
 
-pixdecor_layout_t::~pixdecor_layout_t()
+vkdecor_layout_t::~vkdecor_layout_t()
 {
     this->layout_areas.clear();
 }
 
-wf::geometry_t pixdecor_layout_t::create_left_buttons(int width, int radius)
+wf::geometry_t vkdecor_layout_t::create_left_buttons(int width, int radius)
 {
     // read the string from settings; start at the beginning and replace commas with spaces
-    wf::option_wrapper_t<int> button_spacing{"pixdecor/left_button_spacing"};
-    wf::option_wrapper_t<int> button_x_offset{"pixdecor/left_button_x_offset"};
-    wf::option_wrapper_t<int> button_y_offset{"pixdecor/button_y_offset"};
-    wf::option_wrapper_t<double> button_size{"pixdecor/button_size"};
-    wf::option_wrapper_t<std::string> button_layout{"pixdecor/button_layout"};
+    wf::option_wrapper_t<int> button_spacing{"vkdecor/left_button_spacing"};
+    wf::option_wrapper_t<int> button_x_offset{"vkdecor/left_button_x_offset"};
+    wf::option_wrapper_t<int> button_y_offset{"vkdecor/button_y_offset"};
+    wf::option_wrapper_t<double> button_size{"vkdecor/button_size"};
+    wf::option_wrapper_t<std::string> button_layout{"vkdecor/button_layout"};
     auto layout_str = std::string(button_layout);
     char *b_layout  = layout_str.data();
     char *ptr = b_layout;
@@ -157,14 +157,14 @@ wf::geometry_t pixdecor_layout_t::create_left_buttons(int width, int radius)
     };
 }
 
-wf::geometry_t pixdecor_layout_t::create_right_buttons(int width, int radius)
+wf::geometry_t vkdecor_layout_t::create_right_buttons(int width, int radius)
 {
     // read the string from settings; start at the colon and replace commas with spaces
-    wf::option_wrapper_t<int> button_spacing{"pixdecor/right_button_spacing"};
-    wf::option_wrapper_t<int> button_x_offset{"pixdecor/right_button_x_offset"};
-    wf::option_wrapper_t<int> button_y_offset{"pixdecor/button_y_offset"};
-    wf::option_wrapper_t<double> button_size{"pixdecor/button_size"};
-    wf::option_wrapper_t<std::string> button_layout{"pixdecor/button_layout"};
+    wf::option_wrapper_t<int> button_spacing{"vkdecor/right_button_spacing"};
+    wf::option_wrapper_t<int> button_x_offset{"vkdecor/right_button_x_offset"};
+    wf::option_wrapper_t<int> button_y_offset{"vkdecor/button_y_offset"};
+    wf::option_wrapper_t<double> button_size{"vkdecor/button_size"};
+    wf::option_wrapper_t<std::string> button_layout{"vkdecor/button_layout"};
     auto layout_str = std::string(button_layout);
     char *b_layout  = layout_str.data();
     char *ptr = b_layout + strlen(b_layout) - 1;
@@ -237,11 +237,11 @@ wf::geometry_t pixdecor_layout_t::create_right_buttons(int width, int radius)
 }
 
 /** Regenerate layout using the new size */
-void pixdecor_layout_t::resize(int width, int height)
+void vkdecor_layout_t::resize(int width, int height)
 {
-    wf::option_wrapper_t<int> shadow_radius{"pixdecor/shadow_radius"};
-    wf::option_wrapper_t<std::string> overlay_engine{"pixdecor/overlay_engine"};
-    wf::option_wrapper_t<bool> maximized_borders{"pixdecor/maximized_borders"};
+    wf::option_wrapper_t<int> shadow_radius{"vkdecor/shadow_radius"};
+    wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
+    wf::option_wrapper_t<bool> maximized_borders{"vkdecor/maximized_borders"};
     bool rounded_corners = std::string(overlay_engine) == "rounded_corners";
 
     int border = theme.get_border_size();
@@ -340,7 +340,7 @@ void pixdecor_layout_t::resize(int width, int height)
  * @return The decoration areas which need to be rendered, in top to bottom
  *  order.
  */
-std::vector<nonstd::observer_ptr<decoration_area_t>> pixdecor_layout_t::get_renderable_areas()
+std::vector<nonstd::observer_ptr<decoration_area_t>> vkdecor_layout_t::get_renderable_areas()
 {
     std::vector<nonstd::observer_ptr<decoration_area_t>> renderable;
     for (auto& area : layout_areas)
@@ -354,7 +354,7 @@ std::vector<nonstd::observer_ptr<decoration_area_t>> pixdecor_layout_t::get_rend
     return renderable;
 }
 
-wf::region_t pixdecor_layout_t::calculate_region() const
+wf::region_t vkdecor_layout_t::calculate_region() const
 {
     wf::region_t r{};
     for (auto& area : layout_areas)
@@ -391,13 +391,13 @@ wf::region_t pixdecor_layout_t::calculate_region() const
     return r;
 }
 
-wf::region_t pixdecor_layout_t::limit_region(wf::region_t & region) const
+wf::region_t vkdecor_layout_t::limit_region(wf::region_t & region) const
 {
     wf::region_t out = region & this->cached_titlebar;
     return out;
 }
 
-void pixdecor_layout_t::unset_hover(wf::point_t position)
+void vkdecor_layout_t::unset_hover(wf::point_t position)
 {
     auto area = find_area_at(position);
     if (area && (area->get_type() == DECORATION_AREA_BUTTON))
@@ -407,7 +407,7 @@ void pixdecor_layout_t::unset_hover(wf::point_t position)
 }
 
 /** Handle motion event to (x, y) relative to the decoration */
-pixdecor_layout_t::action_response_t pixdecor_layout_t::handle_motion(
+vkdecor_layout_t::action_response_t vkdecor_layout_t::handle_motion(
     int x, int y)
 {
     auto previous_area = find_area_at(current_input);
@@ -440,7 +440,7 @@ pixdecor_layout_t::action_response_t pixdecor_layout_t::handle_motion(
  * @return The action which needs to be carried out in response to this
  *  event.
  * */
-pixdecor_layout_t::action_response_t pixdecor_layout_t::handle_press_event(
+vkdecor_layout_t::action_response_t vkdecor_layout_t::handle_press_event(
     bool pressed)
 {
     if (pressed)
@@ -507,7 +507,7 @@ pixdecor_layout_t::action_response_t pixdecor_layout_t::handle_press_event(
     return {DECORATION_ACTION_NONE, 0};
 }
 
-pixdecor_layout_t::action_response_t pixdecor_layout_t::handle_axis_event(
+vkdecor_layout_t::action_response_t vkdecor_layout_t::handle_axis_event(
     int delta)
 {
     if (delta < 0)
@@ -523,7 +523,7 @@ pixdecor_layout_t::action_response_t pixdecor_layout_t::handle_axis_event(
  * Find the layout area at the given coordinates, if any
  * @return The layout area or null on failure
  */
-nonstd::observer_ptr<decoration_area_t> pixdecor_layout_t::find_area_at(
+nonstd::observer_ptr<decoration_area_t> vkdecor_layout_t::find_area_at(
     wf::point_t point)
 {
     for (auto& area : this->layout_areas)
@@ -586,10 +586,10 @@ nonstd::observer_ptr<decoration_area_t> pixdecor_layout_t::find_area_at(
 }
 
 /** Calculate resize edges based on @current_input */
-uint32_t pixdecor_layout_t::calculate_resize_edges() const
+uint32_t vkdecor_layout_t::calculate_resize_edges() const
 {
-    wf::option_wrapper_t<int> shadow_radius{"pixdecor/shadow_radius"};
-    wf::option_wrapper_t<std::string> overlay_engine{"pixdecor/overlay_engine"};
+    wf::option_wrapper_t<int> shadow_radius{"vkdecor/shadow_radius"};
+    wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
     int radius     = (std::string(overlay_engine) == "rounded_corners") ? int(shadow_radius) : 0;
     uint32_t edges = 0;
     for (auto& area : layout_areas)
@@ -632,7 +632,7 @@ uint32_t pixdecor_layout_t::calculate_resize_edges() const
 }
 
 /** Update the cursor based on @current_input */
-void pixdecor_layout_t::update_cursor()
+void vkdecor_layout_t::update_cursor()
 {
     uint32_t edges = calculate_resize_edges();
     auto area = find_area_at(this->current_input);
@@ -647,12 +647,12 @@ void pixdecor_layout_t::update_cursor()
     wf::get_core().set_cursor(cursor_name);
 }
 
-void pixdecor_layout_t::set_maximize(bool state)
+void vkdecor_layout_t::set_maximize(bool state)
 {
     maximized = state;
 }
 
-void pixdecor_layout_t::handle_focus_lost()
+void vkdecor_layout_t::handle_focus_lost()
 {
     if (is_grabbed)
     {

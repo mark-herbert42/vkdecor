@@ -1,7 +1,7 @@
-# pixdecor
-![pixdecor](https://github.com/soreau/pixdecor/assets/1450125/af891554-8eeb-4769-b571-fa587afd8350)
+# vkdecor
+![vkdecor](https://github.com/soreau/vkdecor/assets/1450125/af891554-8eeb-4769-b571-fa587afd8350)
 
-A highly configurable decorator plugin for wayfire, pixdecor features antialiased rounded corners with shadows and optional animated effects.
+A highly configurable decorator plugin for wayfire, vkdecor features antialiased rounded corners with shadows and optional animated effects.
 
 ## Installing
 
@@ -17,4 +17,4 @@ Restart wayfire.
 
 ## Running
 
-Disable other decorator plugins and enable pixdecor plugin in core section of `wayfire.ini`.
+Disable other decorator plugins and enable vkdecor plugin in core section of `wayfire.ini`.

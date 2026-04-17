@@ -13,11 +13,11 @@
 
 #include "deco-subsurface.hpp"
 
-const std::string shade_transformer_name = "pixdecor_shade";
+const std::string shade_transformer_name = "vkdecor_shade";
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
 using namespace wf::scene;
 using namespace wf::animation;
@@ -27,13 +27,13 @@ class shade_animation_t : public duration_t
     using duration_t::duration_t;
     timed_transition_t shade{*this};
 };
-class pixdecor_shade : public wf::scene::view_2d_transformer_t
+class vkdecor_shade : public wf::scene::view_2d_transformer_t
 {
     nonstd::observer_ptr<simple_decorator_t> deco = nullptr;
     wayfire_view view;
     wf::output_t *output;
     int titlebar_height;
-    wf::option_wrapper_t<wf::animation_description_t> shade_duration{"pixdecor/shade_duration"};
+    wf::option_wrapper_t<wf::animation_description_t> shade_duration{"vkdecor/shade_duration"};
 
   public:
     bool last_direction;
@@ -46,12 +46,12 @@ class pixdecor_shade : public wf::scene::view_2d_transformer_t
             push_to_parent(ev->region);
         };
 
-        pixdecor_shade *self;
+        vkdecor_shade *self;
         wayfire_view view;
         damage_callback push_to_parent;
 
       public:
-        simple_node_render_instance_t(pixdecor_shade *self, damage_callback push_damage,
+        simple_node_render_instance_t(vkdecor_shade *self, damage_callback push_damage,
             wayfire_view view) : wf::scene::transformer_render_instance_t<transformer_base_node_t>(self,
                 push_damage,
                 view->get_output())
@@ -125,7 +125,7 @@ class pixdecor_shade : public wf::scene::view_2d_transformer_t
         }
     };
 
-    pixdecor_shade(wayfire_view view, int titlebar_height) : wf::scene::view_2d_transformer_t(view)
+    vkdecor_shade(wayfire_view view, int titlebar_height) : wf::scene::view_2d_transformer_t(view)
     {
         this->view   = view;
         this->output = view->get_output();
@@ -274,7 +274,7 @@ class pixdecor_shade : public wf::scene::view_2d_transformer_t
         return this->last_direction;
     }
 
-    virtual ~pixdecor_shade()
+    virtual ~vkdecor_shade()
     {
         if (output)
         {

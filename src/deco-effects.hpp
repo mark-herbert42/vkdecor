@@ -8,7 +8,7 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
 class smoke_t
 {
@@ -22,9 +22,9 @@ class smoke_t
 
     int saved_width = -1, saved_height = -1;
 
-    wf::option_wrapper_t<std::string> overlay_engine{"pixdecor/overlay_engine"};
-    wf::option_wrapper_t<int> rounded_corner_radius{"pixdecor/rounded_corner_radius"};
-    wf::option_wrapper_t<wf::color_t> shadow_color{"pixdecor/shadow_color"};
+    wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
+    wf::option_wrapper_t<int> rounded_corner_radius{"vkdecor/rounded_corner_radius"};
+    wf::option_wrapper_t<wf::color_t> shadow_color{"vkdecor/shadow_color"};
 
   public:
     smoke_t();

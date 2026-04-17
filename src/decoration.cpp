@@ -21,49 +21,49 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
-class wayfire_pixdecor : public wf::plugin_interface_t
+class wayfire_vkdecor : public wf::plugin_interface_t
 {
-    wf::option_wrapper_t<int> border_size{"pixdecor/border_size"};
-    wf::option_wrapper_t<std::string> title_font{"pixdecor/title_font"};
-    wf::option_wrapper_t<int> title_text_align{"pixdecor/title_text_align"};
-    wf::option_wrapper_t<std::string> titlebar{"pixdecor/titlebar"};
-    wf::option_wrapper_t<bool> maximized_borders{"pixdecor/maximized_borders"};
-    wf::option_wrapper_t<bool> maximized_shadows{"pixdecor/maximized_shadows"};
-    wf::option_wrapper_t<wf::color_t> fg_color{"pixdecor/fg_color"};
-    wf::option_wrapper_t<wf::color_t> bg_color{"pixdecor/bg_color"};
-    wf::option_wrapper_t<wf::color_t> fg_text_color{"pixdecor/fg_text_color"};
-    wf::option_wrapper_t<wf::color_t> bg_text_color{"pixdecor/bg_text_color"};
-    wf::option_wrapper_t<wf::color_t> button_color{"pixdecor/button_color"};
-    wf::option_wrapper_t<double> button_line_thickness{"pixdecor/button_line_thickness"};
-    wf::option_wrapper_t<double> button_size{"pixdecor/button_size"};
-    wf::option_wrapper_t<int> left_button_spacing{"pixdecor/left_button_spacing"};
-    wf::option_wrapper_t<int> right_button_spacing{"pixdecor/right_button_spacing"};
-    wf::option_wrapper_t<int> left_button_x_offset{"pixdecor/left_button_x_offset"};
-    wf::option_wrapper_t<int> right_button_x_offset{"pixdecor/right_button_x_offset"};
-    wf::option_wrapper_t<int> button_y_offset{"pixdecor/button_y_offset"};
-    wf::option_wrapper_t<std::string> button_minimize_image{"pixdecor/button_minimize_image"};
-    wf::option_wrapper_t<std::string> button_maximize_image{"pixdecor/button_maximize_image"};
-    wf::option_wrapper_t<std::string> button_restore_image{"pixdecor/button_restore_image"};
-    wf::option_wrapper_t<std::string> button_close_image{"pixdecor/button_close_image"};
-    wf::option_wrapper_t<std::string> button_minimize_hover_image{"pixdecor/button_minimize_hover_image"};
-    wf::option_wrapper_t<std::string> button_maximize_hover_image{"pixdecor/button_maximize_hover_image"};
-    wf::option_wrapper_t<std::string> button_restore_hover_image{"pixdecor/button_restore_hover_image"};
-    wf::option_wrapper_t<std::string> button_close_hover_image{"pixdecor/button_close_hover_image"};
-    wf::option_wrapper_t<std::string> button_layout{"pixdecor/button_layout"};
-    wf::option_wrapper_t<std::string> ignore_views_string{"pixdecor/ignore_views"};
-    wf::option_wrapper_t<std::string> always_decorate_string{"pixdecor/always_decorate"};
-    wf::option_wrapper_t<std::string> overlay_engine{"pixdecor/overlay_engine"};
-    wf::option_wrapper_t<int> rounded_corner_radius{"pixdecor/rounded_corner_radius"};
-    wf::option_wrapper_t<int> shadow_radius{"pixdecor/shadow_radius"};
-    wf::option_wrapper_t<wf::color_t> shadow_color{"pixdecor/shadow_color"};
-    wf::view_matcher_t ignore_views{"pixdecor/ignore_views"};
-    wf::view_matcher_t always_decorate{"pixdecor/always_decorate"};
-    wf::option_wrapper_t<wf::keybinding_t> shade_modifier{"pixdecor/shade_modifier"};
-    wf::option_wrapper_t<int> csd_titlebar_height{"pixdecor/csd_titlebar_height"};
-    wf::option_wrapper_t<bool> enable_shade{"pixdecor/enable_shade"};
-    wf::ipc_activator_t pixdecor_toggle_shade{"pixdecor/shade_toggle"};
+    wf::option_wrapper_t<int> border_size{"vkdecor/border_size"};
+    wf::option_wrapper_t<std::string> title_font{"vkdecor/title_font"};
+    wf::option_wrapper_t<int> title_text_align{"vkdecor/title_text_align"};
+    wf::option_wrapper_t<std::string> titlebar{"vkdecor/titlebar"};
+    wf::option_wrapper_t<bool> maximized_borders{"vkdecor/maximized_borders"};
+    wf::option_wrapper_t<bool> maximized_shadows{"vkdecor/maximized_shadows"};
+    wf::option_wrapper_t<wf::color_t> fg_color{"vkdecor/fg_color"};
+    wf::option_wrapper_t<wf::color_t> bg_color{"vkdecor/bg_color"};
+    wf::option_wrapper_t<wf::color_t> fg_text_color{"vkdecor/fg_text_color"};
+    wf::option_wrapper_t<wf::color_t> bg_text_color{"vkdecor/bg_text_color"};
+    wf::option_wrapper_t<wf::color_t> button_color{"vkdecor/button_color"};
+    wf::option_wrapper_t<double> button_line_thickness{"vkdecor/button_line_thickness"};
+    wf::option_wrapper_t<double> button_size{"vkdecor/button_size"};
+    wf::option_wrapper_t<int> left_button_spacing{"vkdecor/left_button_spacing"};
+    wf::option_wrapper_t<int> right_button_spacing{"vkdecor/right_button_spacing"};
+    wf::option_wrapper_t<int> left_button_x_offset{"vkdecor/left_button_x_offset"};
+    wf::option_wrapper_t<int> right_button_x_offset{"vkdecor/right_button_x_offset"};
+    wf::option_wrapper_t<int> button_y_offset{"vkdecor/button_y_offset"};
+    wf::option_wrapper_t<std::string> button_minimize_image{"vkdecor/button_minimize_image"};
+    wf::option_wrapper_t<std::string> button_maximize_image{"vkdecor/button_maximize_image"};
+    wf::option_wrapper_t<std::string> button_restore_image{"vkdecor/button_restore_image"};
+    wf::option_wrapper_t<std::string> button_close_image{"vkdecor/button_close_image"};
+    wf::option_wrapper_t<std::string> button_minimize_hover_image{"vkdecor/button_minimize_hover_image"};
+    wf::option_wrapper_t<std::string> button_maximize_hover_image{"vkdecor/button_maximize_hover_image"};
+    wf::option_wrapper_t<std::string> button_restore_hover_image{"vkdecor/button_restore_hover_image"};
+    wf::option_wrapper_t<std::string> button_close_hover_image{"vkdecor/button_close_hover_image"};
+    wf::option_wrapper_t<std::string> button_layout{"vkdecor/button_layout"};
+    wf::option_wrapper_t<std::string> ignore_views_string{"vkdecor/ignore_views"};
+    wf::option_wrapper_t<std::string> always_decorate_string{"vkdecor/always_decorate"};
+    wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
+    wf::option_wrapper_t<int> rounded_corner_radius{"vkdecor/rounded_corner_radius"};
+    wf::option_wrapper_t<int> shadow_radius{"vkdecor/shadow_radius"};
+    wf::option_wrapper_t<wf::color_t> shadow_color{"vkdecor/shadow_color"};
+    wf::view_matcher_t ignore_views{"vkdecor/ignore_views"};
+    wf::view_matcher_t always_decorate{"vkdecor/always_decorate"};
+    wf::option_wrapper_t<wf::keybinding_t> shade_modifier{"vkdecor/shade_modifier"};
+    wf::option_wrapper_t<int> csd_titlebar_height{"vkdecor/csd_titlebar_height"};
+    wf::option_wrapper_t<bool> enable_shade{"vkdecor/enable_shade"};
+    wf::ipc_activator_t vkdecor_toggle_shade{"vkdecor/shade_toggle"};
     wf::wl_idle_call idle_update_views;
     std::function<void(void)> update_event;
     wf::effect_hook_t pre_hook;
@@ -171,17 +171,17 @@ class wayfire_pixdecor : public wf::plugin_interface_t
         }
     }
 
-    std::shared_ptr<pixdecor_shade> ensure_transformer(wayfire_view view, int titlebar_height)
+    std::shared_ptr<vkdecor_shade> ensure_transformer(wayfire_view view, int titlebar_height)
     {
         auto tmgr = view->get_transformed_node();
-        if (auto tr = tmgr->get_transformer<pixdecor_shade>(shade_transformer_name))
+        if (auto tr = tmgr->get_transformer<vkdecor_shade>(shade_transformer_name))
         {
             return tr;
         }
 
-        auto node = std::make_shared<pixdecor_shade>(view, titlebar_height);
+        auto node = std::make_shared<vkdecor_shade>(view, titlebar_height);
         tmgr->add_transformer(node, wf::TRANSFORMER_2D, shade_transformer_name);
-        auto tr = tmgr->get_transformer<pixdecor_shade>(shade_transformer_name);
+        auto tr = tmgr->get_transformer<vkdecor_shade>(shade_transformer_name);
 
         return tr;
     }
@@ -204,7 +204,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
         } else
         {
             if (auto tr =
-                    view->get_transformed_node()->get_transformer<pixdecor_shade>(
+                    view->get_transformed_node()->get_transformer<vkdecor_shade>(
                         shade_transformer_name))
             {
                 tr->set_titlebar_height(titlebar_height);
@@ -231,7 +231,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
             wf::get_core().bindings->add_axis(shade_modifier, &shade_axis_cb);
         }
 
-        pixdecor_toggle_shade.set_handler([=] (wf::output_t *output, wayfire_view view)
+        vkdecor_toggle_shade.set_handler([=] (wf::output_t *output, wayfire_view view)
         {
             if (!bool(enable_shade))
             {
@@ -243,7 +243,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
                 bool direction = true;
                 auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
                 if (auto tr =
-                        view->get_transformed_node()->get_transformer<pixdecor_shade>(
+                        view->get_transformed_node()->get_transformer<vkdecor_shade>(
                             shade_transformer_name))
                 {
                     direction = !tr->get_direction();
@@ -294,7 +294,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
             for (auto& view : wf::get_core().get_all_views())
             {
                 if (auto tr =
-                        view->get_transformed_node()->get_transformer<pixdecor_shade>(
+                        view->get_transformed_node()->get_transformer<vkdecor_shade>(
                             shade_transformer_name))
                 {
                     auto toplevel = toplevel_cast(view);
@@ -328,7 +328,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
 
                 remove_decoration(toplevel);
                 adjust_new_decorations(toplevel);
-                wf::pixdecor::schedule_transaction(toplevel->toplevel());
+                wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         });
 
@@ -440,7 +440,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
                 }
 
                 view->damage();
-                wf::pixdecor::schedule_transaction(toplevel->toplevel());
+                wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         });
         maximized_borders.set_callback([=]
@@ -457,7 +457,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
                 view->damage();
                 remove_decoration(toplevel);
                 adjust_new_decorations(toplevel);
-                wf::pixdecor::schedule_transaction(toplevel->toplevel());
+                wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         });
         maximized_shadows.set_callback([=]
@@ -474,7 +474,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
                 view->damage();
                 remove_decoration(toplevel);
                 adjust_new_decorations(toplevel);
-                wf::pixdecor::schedule_transaction(toplevel->toplevel());
+                wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         });
 
@@ -493,7 +493,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
             if (auto toplevel = wf::toplevel_cast(view))
             {
                 remove_decoration(toplevel);
-                wf::pixdecor::schedule_transaction(toplevel->toplevel());
+                wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         }
 
@@ -567,7 +567,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
 
                 remove_decoration(toplevel);
                 adjust_new_decorations(toplevel);
-                wf::pixdecor::schedule_transaction(toplevel->toplevel());
+                wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
 
             return;
@@ -587,7 +587,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
             auto& pending = toplevel->toplevel()->pending();
             if (!resize_decorations || (pending.tiled_edges != 0))
             {
-                wf::pixdecor::schedule_transaction(toplevel->toplevel());
+                wf::vkdecor::schedule_transaction(toplevel->toplevel());
                 continue;
             }
 
@@ -605,7 +605,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
                 pending.geometry = wf::expand_geometry_by_margins(pending.geometry, pending.margins);
             }
 
-            wf::pixdecor::schedule_transaction(toplevel->toplevel());
+            wf::vkdecor::schedule_transaction(toplevel->toplevel());
         }
     }
 
@@ -686,7 +686,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
 
     bool is_toplevel_decorated(const std::shared_ptr<wf::toplevel_t>& toplevel)
     {
-        return toplevel->has_data<wf::pixdecor::simple_decorator_t>();
+        return toplevel->has_data<wf::vkdecor::simple_decorator_t>();
     }
 
     void update_view_decoration(wayfire_view view)
@@ -704,7 +704,7 @@ class wayfire_pixdecor : public wf::plugin_interface_t
                     remove_decoration(toplevel);
                 }
 
-                wf::pixdecor::schedule_transaction(toplevel->toplevel());
+                wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         }
     }
@@ -712,4 +712,4 @@ class wayfire_pixdecor : public wf::plugin_interface_t
 }
 }
 
-DECLARE_WAYFIRE_PLUGIN(wf::pixdecor::wayfire_pixdecor);
+DECLARE_WAYFIRE_PLUGIN(wf::vkdecor::wayfire_vkdecor);

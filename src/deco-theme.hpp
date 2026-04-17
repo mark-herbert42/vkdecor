@@ -9,24 +9,24 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
 /**
  * A  class which manages the outlook of decorations.
  * It is responsible for determining the background colors, sizes, etc.
  */
-class pixdecor_theme_t
+class vkdecor_theme_t
 {
   public:
-    wf::option_wrapper_t<std::string> title_font{"pixdecor/title_font"};
-    wf::option_wrapper_t<std::string> overlay_engine{"pixdecor/overlay_engine"};
-    wf::option_wrapper_t<std::string> effect_type{"pixdecor/effect_type"};
-    wf::option_wrapper_t<bool> maximized_borders{"pixdecor/maximized_borders"};
-    wf::option_wrapper_t<bool> maximized_shadows{"pixdecor/maximized_shadows"};
-    wf::option_wrapper_t<int> title_text_align{"pixdecor/title_text_align"};
+    wf::option_wrapper_t<std::string> title_font{"vkdecor/title_font"};
+    wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
+    wf::option_wrapper_t<std::string> effect_type{"vkdecor/effect_type"};
+    wf::option_wrapper_t<bool> maximized_borders{"vkdecor/maximized_borders"};
+    wf::option_wrapper_t<bool> maximized_shadows{"vkdecor/maximized_shadows"};
+    wf::option_wrapper_t<int> title_text_align{"vkdecor/title_text_align"};
     /** Create a new theme with the default parameters */
-    pixdecor_theme_t();
-    ~pixdecor_theme_t();
+    vkdecor_theme_t();
+    ~vkdecor_theme_t();
 
     /** @return The height of the system font in pixels */
     int get_font_height_px();

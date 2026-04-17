@@ -6,7 +6,7 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
 static constexpr uint32_t DECORATION_AREA_RENDERABLE_BIT = (1 << 16);
 static constexpr uint32_t DECORATION_AREA_RESIZE_BIT     = (1 << 17);
@@ -48,7 +48,7 @@ struct decoration_area_t
      */
     decoration_area_t(wf::geometry_t g,
         std::function<void(wlr_box)> damage_callback,
-        pixdecor_theme_t& theme);
+        vkdecor_theme_t& theme);
 
     /** @return The geometry of the decoration area, relative to the layout */
     wf::geometry_t get_geometry() const;
@@ -88,14 +88,14 @@ enum decoration_layout_action_t
     DECORATION_ACTION_UNSHADE         = 7,
 };
 
-class pixdecor_theme_t;
+class vkdecor_theme_t;
 /**
  * Manages the layout of the decorations, i.e positioning of the title,
  * buttons, etc.
  *
  * Also dispatches the input events to the appropriate place.
  */
-class pixdecor_layout_t
+class vkdecor_layout_t
 {
   public:
     /**
@@ -105,9 +105,9 @@ class pixdecor_layout_t
      * @param damage_callback The function to be called when a part of the
      * layout needs a repaint.
      */
-    pixdecor_layout_t(pixdecor_theme_t& theme,
+    vkdecor_layout_t(vkdecor_theme_t& theme,
         std::function<void(wlr_box)> damage_callback);
-    ~pixdecor_layout_t();
+    ~vkdecor_layout_t();
 
     /** Regenerate layout using the new size */
     void resize(int width, int height);
@@ -163,7 +163,7 @@ class pixdecor_layout_t
   private:
     const int titlebar_size;
     const int border_size;
-    pixdecor_theme_t& theme;
+    vkdecor_theme_t& theme;
     bool maximized;
 
     std::function<void(wlr_box)> damage_callback;

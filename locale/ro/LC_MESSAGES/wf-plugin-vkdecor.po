@@ -463,11 +463,11 @@ msgstr "Activează efectul de restrângere"
 
 #. (itstool) path: option/_long
 msgid ""
-"Use the axis binding or scroll on the titlebar of pixdecor windows to shade "
+"Use the axis binding or scroll on the titlebar of vkdecor windows to shade "
 "windows into their respective titlebars."
 msgstr ""
 "Folosiți asocierea de axă sau derulați pe bara de titlu a ferestrelor "
-"decorate de pixdecor pentru a le restrânge în barele de titlu respective."
+"decorate de vkdecor pentru a le restrânge în barele de titlu respective."
 
 #. (itstool) path: option/_short
 msgid "Shade Duration"

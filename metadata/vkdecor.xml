@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <wayfire>
-	<plugin name="pixdecor">
+	<plugin name="vkdecor">
 		<_short>Pix Decoration</_short>
 		<_long>A highly configurable and optionally fancy decorator plugin for wayfire.</_long>
 		<category>Effects</category>
@@ -239,7 +239,7 @@
 			<_short>Shade</_short>
 			<option name="enable_shade" type="bool">
 				<_short>Enable Shade Effect</_short>
-				<_long>Use the axis binding or scroll on the titlebar of pixdecor windows to shade windows into their respective titlebars.</_long>
+				<_long>Use the axis binding or scroll on the titlebar of vkdecor windows to shade windows into their respective titlebars.</_long>
 				<default>true</default>
 			</option>
 			<option name="shade_duration" type="animation">

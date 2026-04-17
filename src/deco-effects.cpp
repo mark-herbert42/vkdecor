@@ -36,7 +36,7 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
 
 static const char *rounded_corner_overlay =
@@ -455,5 +455,5 @@ void smoke_t::effect_updated()
         recreate_textures(wf::geometry_t{0, 0, saved_width, saved_height});
     });
 }
-} // namespace pixdecor
+} // namespace vkdecor
 }

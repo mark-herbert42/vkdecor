@@ -14,9 +14,9 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
-class pixdecor_theme_t;
+class vkdecor_theme_t;
 
 enum button_type_t
 {
@@ -40,7 +40,7 @@ class button_t
      * @param damage_callback   A callback to execute when the button needs a
      * repaint. Damage won't be reported while render() is being called.
      */
-    button_t(pixdecor_theme_t& theme,
+    button_t(vkdecor_theme_t& theme,
         std::function<void()> damage_callback);
 
     /**
@@ -74,12 +74,12 @@ class button_t
      */
     void render(const wf::scene::render_instruction_t& data, wf::geometry_t geometry);
 
-    pixdecor_theme_t& theme;
+    vkdecor_theme_t& theme;
     std::function<void()> damage_callback;
 
   private:
 
-    wf::option_wrapper_t<int> button_hover_duration{"pixdecor/button_hover_duration"};
+    wf::option_wrapper_t<int> button_hover_duration{"vkdecor/button_hover_duration"};
     button_type_t type;
     wf::owned_texture_t button_texture;
     wf::owned_texture_t button_texture_hovered;

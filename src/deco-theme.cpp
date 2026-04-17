@@ -7,35 +7,35 @@
 
 namespace wf
 {
-namespace pixdecor
+namespace vkdecor
 {
-wf::option_wrapper_t<int> border_size{"pixdecor/border_size"};
-wf::option_wrapper_t<std::string> titlebar{"pixdecor/titlebar"};
-wf::option_wrapper_t<wf::color_t> fg_color{"pixdecor/fg_color"};
-wf::option_wrapper_t<wf::color_t> bg_color{"pixdecor/bg_color"};
-wf::option_wrapper_t<wf::color_t> fg_text_color{"pixdecor/fg_text_color"};
-wf::option_wrapper_t<wf::color_t> bg_text_color{"pixdecor/bg_text_color"};
-wf::option_wrapper_t<std::string> button_minimize_image{"pixdecor/button_minimize_image"};
-wf::option_wrapper_t<std::string> button_maximize_image{"pixdecor/button_maximize_image"};
-wf::option_wrapper_t<std::string> button_restore_image{"pixdecor/button_restore_image"};
-wf::option_wrapper_t<std::string> button_close_image{"pixdecor/button_close_image"};
-wf::option_wrapper_t<std::string> button_minimize_hover_image{"pixdecor/button_minimize_hover_image"};
-wf::option_wrapper_t<std::string> button_maximize_hover_image{"pixdecor/button_maximize_hover_image"};
-wf::option_wrapper_t<std::string> button_restore_hover_image{"pixdecor/button_restore_hover_image"};
-wf::option_wrapper_t<std::string> button_close_hover_image{"pixdecor/button_close_hover_image"};
-wf::option_wrapper_t<wf::color_t> button_color{"pixdecor/button_color"};
-wf::option_wrapper_t<double> button_line_thickness{"pixdecor/button_line_thickness"};
+wf::option_wrapper_t<int> border_size{"vkdecor/border_size"};
+wf::option_wrapper_t<std::string> titlebar{"vkdecor/titlebar"};
+wf::option_wrapper_t<wf::color_t> fg_color{"vkdecor/fg_color"};
+wf::option_wrapper_t<wf::color_t> bg_color{"vkdecor/bg_color"};
+wf::option_wrapper_t<wf::color_t> fg_text_color{"vkdecor/fg_text_color"};
+wf::option_wrapper_t<wf::color_t> bg_text_color{"vkdecor/bg_text_color"};
+wf::option_wrapper_t<std::string> button_minimize_image{"vkdecor/button_minimize_image"};
+wf::option_wrapper_t<std::string> button_maximize_image{"vkdecor/button_maximize_image"};
+wf::option_wrapper_t<std::string> button_restore_image{"vkdecor/button_restore_image"};
+wf::option_wrapper_t<std::string> button_close_image{"vkdecor/button_close_image"};
+wf::option_wrapper_t<std::string> button_minimize_hover_image{"vkdecor/button_minimize_hover_image"};
+wf::option_wrapper_t<std::string> button_maximize_hover_image{"vkdecor/button_maximize_hover_image"};
+wf::option_wrapper_t<std::string> button_restore_hover_image{"vkdecor/button_restore_hover_image"};
+wf::option_wrapper_t<std::string> button_close_hover_image{"vkdecor/button_close_hover_image"};
+wf::option_wrapper_t<wf::color_t> button_color{"vkdecor/button_color"};
+wf::option_wrapper_t<double> button_line_thickness{"vkdecor/button_line_thickness"};
 /** Create a new theme with the default parameters */
-pixdecor_theme_t::pixdecor_theme_t() : font_description(nullptr, pango_font_description_free)
+vkdecor_theme_t::vkdecor_theme_t() : font_description(nullptr, pango_font_description_free)
 {
     // read initial colours
     update_colors();
 }
 
-pixdecor_theme_t::~pixdecor_theme_t()
+vkdecor_theme_t::~vkdecor_theme_t()
 {}
 
-void pixdecor_theme_t::update_colors(void)
+void vkdecor_theme_t::update_colors(void)
 {
     fg = wf::color_t(fg_color);
     bg = wf::color_t(bg_color);
@@ -44,14 +44,14 @@ void pixdecor_theme_t::update_colors(void)
 }
 
 std::unique_ptr<PangoFontDescription,
-    decltype(& pango_font_description_free)> pixdecor_theme_t::get_font_description()
+    decltype(& pango_font_description_free)> vkdecor_theme_t::get_font_description()
 {
     font_description.reset(pango_font_description_from_string(title_font.value().c_str()));
     return std::move(font_description);
 }
 
 /** @return The available height for displaying the title */
-int pixdecor_theme_t::get_font_height_px()
+int vkdecor_theme_t::get_font_height_px()
 {
     auto font_desc  = get_font_description();
     int font_height = pango_font_description_get_size(font_desc.get());
@@ -65,7 +65,7 @@ int pixdecor_theme_t::get_font_height_px()
     return font_height / PANGO_SCALE;
 }
 
-int pixdecor_theme_t::get_title_height()
+int vkdecor_theme_t::get_title_height()
 {
     int height = get_font_height_px();
     height *= 3;
@@ -83,23 +83,23 @@ int pixdecor_theme_t::get_title_height()
 }
 
 /** @return The available border for resizing */
-int pixdecor_theme_t::get_border_size() const
+int vkdecor_theme_t::get_border_size() const
 {
     return (!maximized_borders && maximized) ? 0 : border_size;
 }
 
 /** @return The input area for resizing */
-int pixdecor_theme_t::get_input_size() const
+int vkdecor_theme_t::get_input_size() const
 {
     return std::max(get_border_size(), MIN_RESIZE_HANDLE_SIZE);
 }
 
-wf::color_t pixdecor_theme_t::get_decor_color(bool active) const
+wf::color_t vkdecor_theme_t::get_decor_color(bool active) const
 {
     return active ? fg : bg;
 }
 
-void pixdecor_theme_t::set_maximize(bool state)
+void vkdecor_theme_t::set_maximize(bool state)
 {
     maximized = state;
 }
@@ -112,7 +112,7 @@ void pixdecor_theme_t::set_maximize(bool state)
  * @param scissor The GL scissor rectangle to use.
  * @param active Whether to use active or inactive colors
  */
-void pixdecor_theme_t::render_background(const wf::scene::render_instruction_t& data,
+void vkdecor_theme_t::render_background(const wf::scene::render_instruction_t& data,
     wf::geometry_t rectangle, bool active, wf::pointf_t p)
 {
     if (std::string(overlay_engine) == "none")
@@ -136,7 +136,7 @@ void pixdecor_theme_t::render_background(const wf::scene::render_instruction_t& 
  * Render the given text on a cairo_surface_t with the given size.
  * The caller is responsible for freeing the memory afterwards.
  */
-cairo_surface_t*pixdecor_theme_t::render_text(std::string text,
+cairo_surface_t*vkdecor_theme_t::render_text(std::string text,
     int width, int height, int t_width, int border, int buttons_width, bool active)
 {
     const auto format = CAIRO_FORMAT_ARGB32;
@@ -275,7 +275,7 @@ static bool create_button_surfaces(std::unique_ptr<button_surfaces_t>& button_su
     return normal_same_as_hover;
 }
 
-std::unique_ptr<button_surfaces_t> pixdecor_theme_t::get_button_surface(button_type_t button,
+std::unique_ptr<button_surfaces_t> vkdecor_theme_t::get_button_surface(button_type_t button,
     const button_state_t& state) const
 {
     std::unique_ptr<button_surfaces_t> button_surfaces = std::make_unique<button_surfaces_t>();
