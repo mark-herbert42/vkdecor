@@ -1,7 +1,16 @@
 # vkdecor
-![vkdecor](https://github.com/soreau/vkdecor/assets/1450125/af891554-8eeb-4769-b571-fa587afd8350)
 
-A decorator plugin for wayfire, vkdecor is forked from pixdecor and keep only  antialiased rounded corners with shadows effects from it.
+
+A decorator plugin for wayfire, vkdecor is forked from Scott Moreau (soreau) pixdecor plugin and is keeping only very limited part of the initial functionality. 
+The purpose is to migrate the decorator to vulkan API from GLES, so dropping majority of fancy GLES effects to simplify the transition.
+
+I've unforked this development because it is never going to be backmerged to pixdecor, and sometimes the full masterpiece will come to vulkan world. 
+
+But for now trying to make minimal functionality of server side deocorations to work 
+
+The plan is to keep only  antialiased rounded corners with shadows effects droping the most advanced eye-candy.
+
+Currently only basic decoration works/
 
 ## Installing
 
