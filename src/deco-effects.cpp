@@ -42,6 +42,7 @@ namespace vkdecor
 static const char *rounded_corner_overlay =
     R"(
 #version 320 es
+#extension GL_KHR_vulkan_glsl : enable
 
 layout(binding = 0, rgba32f) readonly uniform highp image2D in_tex;  // Use binding point 0
 layout(binding = 0, rgba32f) writeonly uniform highp image2D out_tex;  // Use binding point 0
@@ -158,13 +159,6 @@ void setup_shader(GLuint *program, std::string source)
     *program = compute_program;
 }
 
-static void seed_random()
-{
-    timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    srandom(ts.tv_nsec);
-}
-
 void smoke_t::destroy_programs()
 {
 
@@ -193,7 +187,6 @@ smoke_t::smoke_t()
     texture = GLuint(-1);
 
     create_programs();
-    seed_random();
 }
 
 smoke_t::~smoke_t()
@@ -220,65 +213,6 @@ void smoke_t::destroy_textures()
 int round_up_div(int a, int b)
 {
     return (a + b - 1) / b;
-}
-
-void smoke_t::dispatch_region(const wf::region_t& region)
-{
-    std::vector<int> values;
-
-    int max_x = 0;
-    int max_y = 0;
-
-    for (auto& box : region)
-    {
-        auto rect = wlr_box_from_pixman_box(box);
-        values.push_back(rect.x);
-        values.push_back(rect.y);
-        values.push_back(rect.width);
-        values.push_back(rect.height);
-
-        if (rect.width > rect.height)
-        {
-            values.push_back(0); // xy will not be flipped in compute shader
-            max_x = std::max(max_x, rect.width);
-            max_y = std::max(max_y, rect.height);
-        } else
-        {
-            values.push_back(1); // xy will be flipped in compute shader
-            max_x = std::max(max_x, rect.height);
-            max_y = std::max(max_y, rect.width);
-        }
-    }
-
-    if (values.size() / 5 > 4)
-    {
-        LOGE("Error: too many regions");
-        return;
-    }
-
-    GL_CALL(glUniform1iv(10, values.size(), values.data()));
-    GL_CALL(glDispatchCompute(round_up_div(max_x, 16), round_up_div(max_y, 16), values.size() / 5));
-    GL_CALL(glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT));
-}
-
-void smoke_t::run_shader_region(GLuint program, const wf::region_t & region, const wf::dimensions_t & size)
-{
-    GL_CALL(glUseProgram(program));
-    GL_CALL(glUniform1i(5, size.width));
-    GL_CALL(glUniform1i(6, size.height));
-    dispatch_region(region);
-}
-
-void smoke_t::run_shader(GLuint program, int width, int height, int title_height, int border_size, int radius)
-{
-    GL_CALL(glUseProgram(program));
-    GL_CALL(glUniform1i(1, title_height + border_size + radius * 2));
-    GL_CALL(glUniform1i(2, border_size + radius * 2));
-    GL_CALL(glUniform1i(5, width));
-    GL_CALL(glUniform1i(6, height));
-    GL_CALL(glUniform1i(9, radius * 2));
-    GL_CALL(glDispatchCompute(width / 15, height / 15, 1));
-    GL_CALL(glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT));
 }
 
 void smoke_t::recreate_textures(wf::geometry_t rectangle)
@@ -356,25 +290,17 @@ if (std::string(overlay_engine) != "none")
                 GL_TEXTURE_2D, texture, 0));
             OpenGL::clear(decor_color, GL_COLOR_BUFFER_BIT);
             GL_CALL(glDeleteFramebuffers(1, &fb));
-        }
-
-        if (std::string(overlay_engine) == "rounded_corners") 
-        {
             GL_CALL(glUseProgram(render_overlay_program));
             GL_CALL(glUniform1i(1, title_height + border_size + radius * 2));
             GL_CALL(glUniform1i(2, border_size + radius * 2));
             GL_CALL(glUniform1i(5, rectangle.width));
             GL_CALL(glUniform1i(6, rectangle.height));
             GL_CALL(glUniform1i(7, rounded_corner_radius));
-            if (std::string(overlay_engine) == "rounded_corners")
-            {
                 GLfloat shadow_color_f[4] =
                 {GLfloat(wf::color_t(shadow_color).r), GLfloat(wf::color_t(shadow_color).g),
                     GLfloat(wf::color_t(shadow_color).b), GLfloat(wf::color_t(shadow_color).a)};
                 GL_CALL(glUniform1i(8, radius));
                 GL_CALL(glUniform4fv(9, 1, shadow_color_f));
-            }
-
             GL_CALL(glDispatchCompute(round_up_div(rectangle.width, 16), round_up_div(rectangle.height, 16),
                 1));
             GL_CALL(glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT));
