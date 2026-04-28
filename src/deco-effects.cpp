@@ -167,34 +167,11 @@ static void seed_random()
 
 void smoke_t::destroy_programs()
 {
-    if (motion_program != GLuint(-1))
-    {
-        GL_CALL(glDeleteProgram(motion_program));
-        GL_CALL(glDeleteProgram(diffuse1_program));
-        GL_CALL(glDeleteProgram(diffuse2_program));
-        GL_CALL(glDeleteProgram(project1_program));
-        GL_CALL(glDeleteProgram(project2_program));
-        GL_CALL(glDeleteProgram(project3_program));
-        GL_CALL(glDeleteProgram(project4_program));
-        GL_CALL(glDeleteProgram(project5_program));
-        GL_CALL(glDeleteProgram(project6_program));
-        GL_CALL(glDeleteProgram(advect1_program));
-        GL_CALL(glDeleteProgram(advect2_program));
-    }
-
-    if (render_program != GLuint(-1))
-    {
-        GL_CALL(glDeleteProgram(render_program));
-    }
 
     if (render_overlay_program != GLuint(-1))
     {
         GL_CALL(glDeleteProgram(render_overlay_program));
     }
-
-    motion_program = diffuse1_program = diffuse2_program = project1_program =
-        project2_program     = project3_program = project4_program = project5_program =
-            project6_program = advect1_program = advect2_program = render_program =
                 render_overlay_program = GLuint(-1);
 }
 
@@ -211,12 +188,9 @@ void smoke_t::create_programs()
 
 smoke_t::smoke_t()
 {
-    motion_program = diffuse1_program = diffuse2_program = project1_program =
-        project2_program     = project3_program = project4_program = project5_program =
-            project6_program = advect1_program = advect2_program = render_program =
-                render_overlay_program = GLuint(-1);
+    render_overlay_program = GLuint(-1);
 
-    texture = b0u = b0v = b0d = b1u = b1v = b1d = GLuint(-1);
+    texture = GLuint(-1);
 
     create_programs();
     seed_random();
@@ -231,12 +205,6 @@ smoke_t::~smoke_t()
 void smoke_t::create_textures()
 {
     GL_CALL(glGenTextures(1, &texture));
-    GL_CALL(glGenTextures(1, &b0u));
-    GL_CALL(glGenTextures(1, &b0v));
-    GL_CALL(glGenTextures(1, &b0d));
-    GL_CALL(glGenTextures(1, &b1u));
-    GL_CALL(glGenTextures(1, &b1v));
-    GL_CALL(glGenTextures(1, &b1d));
 }
 
 void smoke_t::destroy_textures()
@@ -247,19 +215,6 @@ void smoke_t::destroy_textures()
         texture = GLuint(-1);
     }
 
-    if (b0u == GLuint(-1))
-    {
-        return;
-    }
-
-    GL_CALL(glDeleteTextures(1, &b0u));
-    GL_CALL(glDeleteTextures(1, &b0v));
-    GL_CALL(glDeleteTextures(1, &b0d));
-    GL_CALL(glDeleteTextures(1, &b1u));
-    GL_CALL(glDeleteTextures(1, &b1v));
-    GL_CALL(glDeleteTextures(1, &b1d));
-
-    b0u = b0v = b0d = b1u = b1v = b1d = GLuint(-1);
 }
 
 int round_up_div(int a, int b)
