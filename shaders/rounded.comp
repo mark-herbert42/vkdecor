@@ -5,13 +5,15 @@ layout(binding = 0, rgba32f) readonly uniform highp image2D in_tex;  // Use bind
 layout(binding = 0, rgba32f) writeonly uniform highp image2D out_tex;  // Use binding point 0
 
 
-layout(location = 1) uniform int title_height;
-layout(location = 2) uniform int border_size;
-layout(location = 5) uniform int width;
-layout(location = 6) uniform int height;
-layout(location = 7) uniform int corner_radius;
-layout(location = 8) uniform int shadow_radius;
-layout(location = 9) uniform vec4 shadow_color;
+layout(set = 0,  binding = 0 ) uniform UBO {
+int title_height;
+int border_size;
+int width;
+int height;
+int corner_radius;
+int shadow_radius;
+vec4 shadow_color;
+};
 
 
 void main() {
