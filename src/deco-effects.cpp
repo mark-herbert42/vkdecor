@@ -42,7 +42,6 @@ namespace vkdecor
 static const char *rounded_corner_overlay =
     R"(
 #version 320 es
-#extension GL_KHR_vulkan_glsl : enable
 
 layout(binding = 0, rgba32f) readonly uniform highp image2D in_tex;  // Use binding point 0
 layout(binding = 0, rgba32f) writeonly uniform highp image2D out_tex;  // Use binding point 0
@@ -174,7 +173,6 @@ void smoke_t::create_programs()
     destroy_programs();
     wf::gles::run_in_context_if_gles([&]
     {
-        if (std::string(overlay_engine) == "rounded_corners")
             setup_shader(&render_overlay_program, rounded_corner_overlay);		
 
     });
@@ -234,7 +232,7 @@ void smoke_t::recreate_textures(wf::geometry_t rectangle)
 }
 
 void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geometry_t rectangle,
-    bool ink, wf::pointf_t p, wf::color_t decor_color,
+    wf::pointf_t p, wf::color_t decor_color,
     int title_height, int border_size, int shadow_radius)
 {
 
@@ -242,19 +240,23 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
     {
         return;
     }
+    
+    if ((rectangle.width == saved_width) && (rectangle.height == saved_height))
+    {
+        return;
+    }   
 
     int radius = shadow_radius;
+    LOGI("step_effect: ", rectangle.width);
 
     wf::gles::run_in_context_if_gles([&]
     {
         wf::gles::bind_render_buffer(data.target);
-        if ((rectangle.width != saved_width) || (rectangle.height != saved_height))
-        {
+            
             saved_width  = rectangle.width;
             saved_height = rectangle.height;
 
             recreate_textures(rectangle);
-        }
 
         GL_CALL(glActiveTexture(GL_TEXTURE0 + 0));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
@@ -279,7 +281,7 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
         border_region.expand_edges(1);
         border_region &= nonshadow_rect;
 
-if (std::string(overlay_engine) != "none")
+		if (std::string(overlay_engine) != "none")
         {
             GLuint fb;
             GL_CALL(glGenFramebuffers(1, &fb));
@@ -315,7 +317,6 @@ void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geo
     OpenGL::render_transformed_texture(wf::gles_texture_t{texture}, rectangle,
         wf::gles::render_target_orthographic_projection(data.target), glm::vec4{1},
         OpenGL::TEXTURE_TRANSFORM_INVERT_Y | OpenGL::RENDER_FLAG_CACHED);
-
     data.pass->custom_gles_subpass(data.target, [&]
     {
         for (auto& box : data.damage)
@@ -325,7 +326,7 @@ void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geo
         }
     });
 
-    OpenGL::clear_cached();
+    OpenGL::clear_cached();    
 }
 
 void smoke_t::effect_updated()

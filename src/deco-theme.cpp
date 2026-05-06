@@ -115,7 +115,7 @@ void vkdecor_theme_t::set_maximize(bool state)
 void vkdecor_theme_t::render_background(const wf::scene::render_instruction_t& data,
     wf::geometry_t rectangle, bool active, wf::pointf_t p)
 {
-    if (std::string(overlay_engine) == "none")
+    if ((std::string(overlay_engine) == "none") || (!(wf::get_core().is_gles2())))
     {
 
             for (auto& box : data.damage)

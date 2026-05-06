@@ -27,7 +27,6 @@
 #include <wayfire/plugins/common/cairo-util.hpp>
 
 #include <cairo.h>
-#include "shade.hpp"
 
 
 namespace wf
@@ -36,8 +35,6 @@ namespace vkdecor
 {
 wf::option_wrapper_t<int> shadow_radius{"vkdecor/shadow_radius"};
 wf::option_wrapper_t<std::string> titlebar_opt{"vkdecor/titlebar"};
-wf::option_wrapper_t<int> csd_titlebar_height{"vkdecor/csd_titlebar_height"};
-wf::option_wrapper_t<bool> enable_shade{"vkdecor/enable_shade"};
 wf::option_wrapper_t<std::string> title_font{"vkdecor/title_font"};
 wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
 wf::option_wrapper_t<bool> maximized_borders{"vkdecor/maximized_borders"};
@@ -127,7 +124,7 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
 
     ~simple_decoration_node_t()
     {
-        remove_shade_transformers();
+
     }
 
     wf::point_t get_offset()
@@ -146,19 +143,7 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
     {
         update_title(geometry.width, geometry.height, t_width, border, buttons_width, data.target.scale);
         data.pass->add_texture( title_texture.tex.get_texture(), data.target, geometry, data.damage, 1.0 );
-/*        OpenGL::render_texture(wf::gles_texture_t{title_texture.tex.get_texture()}, data.target, geometry,
-            glm::vec4(1.0f), OpenGL::RENDER_FLAG_CACHED);
 
-        data.pass->custom_gles_subpass(data.target, [&]
-        {
-            for (auto& box : data.damage)
-            {
-                wf::gles::render_target_logic_scissor(data.target, wlr_box_from_pixman_box(box));
-                OpenGL::draw_cached();
-            }
-        });
-
-        OpenGL::clear_cached();*/
     }
 
     void render_region(const wf::scene::render_instruction_t& data, wf::point_t origin)
@@ -313,9 +298,9 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
                 maximized = maximized_shadows ? false : view->pending_tiled_edges();
             }
 
-            if (std::string(overlay_engine) != "none")
+          if (std::string(overlay_engine) != "none")
             {
-                self->theme.smoke.step_effect(data, rectangle, false ,
+                self->theme.smoke.step_effect(data, rectangle ,
                     self->current_cursor_position, self->theme.get_decor_color(activated),
                     self->theme.get_title_height(), self->theme.get_border_size(),
                     (std::string(overlay_engine) == "rounded_corners" && !maximized) ? shadow_radius : 0);
@@ -374,64 +359,6 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
         }
     }
 
-    void pop_transformer(wayfire_view view)
-    {
-        if (view->get_transformed_node()->get_transformer(shade_transformer_name))
-        {
-            view->get_transformed_node()->rem_transformer(shade_transformer_name);
-        }
-    }
-
-    void remove_shade_transformers()
-    {
-        for (auto& view : wf::get_core().get_all_views())
-        {
-            pop_transformer(view);
-        }
-    }
-
-    std::shared_ptr<vkdecor_shade> ensure_transformer(wayfire_view view, int titlebar_height)
-    {
-        auto tmgr = view->get_transformed_node();
-        if (auto tr = tmgr->get_transformer<vkdecor_shade>(shade_transformer_name))
-        {
-            return tr;
-        }
-
-        auto node = std::make_shared<vkdecor_shade>(view, titlebar_height);
-        tmgr->add_transformer(node, wf::TRANSFORMER_2D, shade_transformer_name);
-        auto tr = tmgr->get_transformer<vkdecor_shade>(shade_transformer_name);
-
-        return tr;
-    }
-
-    void init_shade(wayfire_view view, bool shade, int titlebar_height)
-    {
-        if (!bool(enable_shade))
-        {
-            return;
-        }
-
-        if (shade)
-        {
-            if (view && view->is_mapped())
-            {
-                auto tr = ensure_transformer(view, titlebar_height);
-                tr->set_titlebar_height(titlebar_height);
-                tr->init_animation(shade);
-            }
-        } else
-        {
-            if (auto tr =
-                    view->get_transformed_node()->get_transformer<vkdecor_shade>(
-                        shade_transformer_name))
-            {
-                tr->set_titlebar_height(titlebar_height);
-                tr->init_animation(shade);
-            }
-        }
-    }
-
     void handle_action(vkdecor_layout_t::action_response_t action)
     {
         if (auto view = _view.lock())
@@ -457,15 +384,7 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
                 }
 
                 break;
-
-              case DECORATION_ACTION_SHADE:
-                init_shade(view, true, current_titlebar);
-                break;
-
-              case DECORATION_ACTION_UNSHADE:
-                init_shade(view, false, current_titlebar);
-                break;
-
+                
               case DECORATION_ACTION_MINIMIZE:
                 return wf::get_core().default_wm->minimize_request(view, true);
                 break;
@@ -551,12 +470,6 @@ class simple_decoration_node_t : public wf::scene::node_t, public wf::pointer_in
                 this->cached_region = layout.calculate_region();
             }
 
-            if (auto tr =
-                    view->get_transformed_node()->get_transformer<vkdecor_shade>(
-                        shade_transformer_name))
-            {
-                tr->set_titlebar_height(current_titlebar);
-            }
 
             view->damage();
         }
@@ -668,24 +581,10 @@ wf::decoration_margins_t simple_decorator_t::get_margins(const wf::toplevel_stat
         }
     }
 
-    double shade_progress = 0.0;
-    if (auto tr =
-            view->get_transformed_node()->get_transformer<vkdecor_shade>(
-                shade_transformer_name))
-    {
-        tr->set_titlebar_height(titlebar);
-        shade_progress = tr->progression.shade;
-    }
-
     if (!view->has_data(custom_data_name))
     {
         view->store_data(std::make_unique<wf_shadow_margin_t>(), custom_data_name);
     }
-
-    view->get_data<wf_shadow_margin_t>(custom_data_name)->set_margins(
-        {shadow_thickness, shadow_thickness, shadow_thickness,
-            shadow_thickness +
-            int((view->get_geometry().height - shadow_thickness - titlebar) * shade_progress)});
 
     return wf::decoration_margins_t{
         .left   = thickness,
@@ -693,19 +592,6 @@ wf::decoration_margins_t simple_decorator_t::get_margins(const wf::toplevel_stat
         .bottom = thickness,
         .top    = titlebar,
     };
-}
-
-void simple_decorator_t::update_animation()
-{
-    auto margins = get_margins(view->toplevel()->current());
-    auto bbox    = deco->get_bounding_box();
-
-    wf::region_t region;
-    region |= wlr_box{bbox.x, bbox.y, bbox.width, margins.top};
-    region |= wlr_box{bbox.x, bbox.y, margins.left, bbox.height};
-    region |= wlr_box{bbox.x, bbox.y + bbox.height - margins.bottom, bbox.width, margins.bottom};
-    region |= wlr_box{bbox.x + bbox.width - margins.right, bbox.y, margins.right, bbox.height};
-    wf::scene::damage_node(deco, region);
 }
 }
 }

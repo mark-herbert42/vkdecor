@@ -27,7 +27,7 @@ class smoke_t
     ~smoke_t();
     
     void step_effect(const wf::scene::render_instruction_t& data, wf::geometry_t rectangle,
-        bool ink, wf::pointf_t p, wf::color_t decor_color,
+        wf::pointf_t p, wf::color_t decor_color,
         int title_height, int border_size, int shadow_radius);
     void render_effect(const wf::scene::render_instruction_t& data, wf::geometry_t rectangle);
     void recreate_textures(wf::geometry_t rectangle);

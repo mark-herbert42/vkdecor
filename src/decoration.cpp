@@ -17,7 +17,6 @@
 #include <dlfcn.h>
 #include <wayfire/bindings-repository.hpp>
 #include <wayfire/plugins/ipc/ipc-activator.hpp>
-#include "shade.hpp"
 
 namespace wf
 {
@@ -60,17 +59,12 @@ class wayfire_vkdecor : public wf::plugin_interface_t
     wf::option_wrapper_t<wf::color_t> shadow_color{"vkdecor/shadow_color"};
     wf::view_matcher_t ignore_views{"vkdecor/ignore_views"};
     wf::view_matcher_t always_decorate{"vkdecor/always_decorate"};
-    wf::option_wrapper_t<wf::keybinding_t> shade_modifier{"vkdecor/shade_modifier"};
-    wf::option_wrapper_t<int> csd_titlebar_height{"vkdecor/csd_titlebar_height"};
-    wf::option_wrapper_t<bool> enable_shade{"vkdecor/enable_shade"};
-    wf::ipc_activator_t vkdecor_toggle_shade{"vkdecor/shade_toggle"};
     wf::wl_idle_call idle_update_views;
     std::function<void(void)> update_event;
     wf::effect_hook_t pre_hook;
     bool hook_set = false;
     bool initial_state = true;
 
-    wf::axis_callback shade_axis_cb;
 
     wf::signal::connection_t<wf::txn::new_transaction_signal> on_new_tx =
         [=] (wf::txn::new_transaction_signal *ev)
@@ -155,64 +149,6 @@ class wayfire_vkdecor : public wf::plugin_interface_t
         ev->output->render->rem_effect(&pre_hook);
     };
 
-    void pop_transformer(wayfire_view view)
-    {
-        if (view->get_transformed_node()->get_transformer(shade_transformer_name))
-        {
-            view->get_transformed_node()->rem_transformer(shade_transformer_name);
-        }
-    }
-
-    void remove_shade_transformers()
-    {
-        for (auto& view : wf::get_core().get_all_views())
-        {
-            pop_transformer(view);
-        }
-    }
-
-    std::shared_ptr<vkdecor_shade> ensure_transformer(wayfire_view view, int titlebar_height)
-    {
-        auto tmgr = view->get_transformed_node();
-        if (auto tr = tmgr->get_transformer<vkdecor_shade>(shade_transformer_name))
-        {
-            return tr;
-        }
-
-        auto node = std::make_shared<vkdecor_shade>(view, titlebar_height);
-        tmgr->add_transformer(node, wf::TRANSFORMER_2D, shade_transformer_name);
-        auto tr = tmgr->get_transformer<vkdecor_shade>(shade_transformer_name);
-
-        return tr;
-    }
-
-    void init_shade(wayfire_view view, bool shade, int titlebar_height)
-    {
-        if (!bool(enable_shade))
-        {
-            return;
-        }
-
-        if (shade)
-        {
-            if (view && view->is_mapped())
-            {
-                auto tr = ensure_transformer(view, titlebar_height);
-                tr->set_titlebar_height(titlebar_height);
-                tr->init_animation(shade);
-            }
-        } else
-        {
-            if (auto tr =
-                    view->get_transformed_node()->get_transformer<vkdecor_shade>(
-                        shade_transformer_name))
-            {
-                tr->set_titlebar_height(titlebar_height);
-                tr->init_animation(shade);
-            }
-        }
-    }
-
   public:
 
     void init() override
@@ -225,89 +161,6 @@ class wayfire_vkdecor : public wf::plugin_interface_t
         wf::get_core().connect(&on_app_id_changed);
         wf::get_core().connect(&on_title_changed);
         wf::get_core().connect(&on_view_tiled);
-
-        if (bool(enable_shade))
-        {
-            wf::get_core().bindings->add_axis(shade_modifier, &shade_axis_cb);
-        }
-
-        vkdecor_toggle_shade.set_handler([=] (wf::output_t *output, wayfire_view view)
-        {
-            if (!bool(enable_shade))
-            {
-                return false;
-            }
-
-            if (auto toplevel = wf::toplevel_cast(view))
-            {
-                bool direction = true;
-                auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
-                if (auto tr =
-                        view->get_transformed_node()->get_transformer<vkdecor_shade>(
-                            shade_transformer_name))
-                {
-                    direction = !tr->get_direction();
-                }
-
-                init_shade(view, direction,
-                    deco ? deco->get_titlebar_height() : csd_titlebar_height);
-                return true;
-            }
-
-            return false;
-        });
-
-        shade_axis_cb = [=] (wlr_pointer_axis_event *ev)
-        {
-            auto v = wf::get_core().get_cursor_focus_view();
-            if (ev->orientation == WL_POINTER_AXIS_VERTICAL_SCROLL)
-            {
-                if (auto toplevel = wf::toplevel_cast(v))
-                {
-                    auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
-                    init_shade(v, ev->delta < 0 ? true : false,
-                        deco ? deco->get_titlebar_height() : csd_titlebar_height);
-                    return true;
-                }
-
-                return true;
-            }
-
-            return false;
-        };
-
-        enable_shade.set_callback([=]
-        {
-            if (bool(enable_shade))
-            {
-                wf::get_core().bindings->add_axis(shade_modifier, &shade_axis_cb);
-            }
-
-            {
-                wf::get_core().bindings->rem_binding(&shade_axis_cb);
-                remove_shade_transformers();
-            }
-        });
-
-        csd_titlebar_height.set_callback([=] ()
-        {
-            for (auto& view : wf::get_core().get_all_views())
-            {
-                if (auto tr =
-                        view->get_transformed_node()->get_transformer<vkdecor_shade>(
-                            shade_transformer_name))
-                {
-                    auto toplevel = toplevel_cast(view);
-                    if (toplevel)
-                    {
-                        if (!toplevel->toplevel()->get_data<simple_decorator_t>())
-                        {
-                            tr->set_titlebar_height(csd_titlebar_height);
-                        }
-                    }
-                }
-            }
-        });
 
         for (auto& view : wf::get_core().get_all_views())
         {
@@ -379,8 +232,6 @@ class wayfire_vkdecor : public wf::plugin_interface_t
                     continue;
                 }
 
-                auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
-                deco->update_animation();
             }
         };
 
@@ -512,8 +363,6 @@ class wayfire_vkdecor : public wf::plugin_interface_t
         on_app_id_changed.disconnect();
         on_title_changed.disconnect();
 
-        wf::get_core().bindings->rem_binding(&shade_axis_cb);
-        remove_shade_transformers();
     }
 
     void recreate_frame(wayfire_toplevel_view toplevel)

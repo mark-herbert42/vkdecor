@@ -54,7 +54,6 @@ class simple_decorator_t : public wf::custom_data_t
     ~simple_decorator_t();
     wf::decoration_margins_t get_margins(const wf::toplevel_state_t& state);
     int get_titlebar_height();
-    void update_animation();
     int shadow_thickness;
 };
 
