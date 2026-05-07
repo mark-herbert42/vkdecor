@@ -429,9 +429,12 @@ class wayfire_vkdecor : public wf::plugin_interface_t
             {
                 continue;
             }
-
-            view->damage();
-            toplevel->toplevel()->get_data<simple_decorator_t>()->effect_updated();
+            
+            if (wf::get_core().is_gles2())
+			{ 
+				view->damage();
+				toplevel->toplevel()->get_data<simple_decorator_t>()->effect_updated();
+			}	
 
             auto& pending = toplevel->toplevel()->pending();
             if (!resize_decorations || (pending.tiled_edges != 0))

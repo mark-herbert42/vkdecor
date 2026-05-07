@@ -36,8 +36,56 @@
 
 namespace wf
 {
+	
+/**************************************************Vulkan init class **************************************************/
+namespace vk
+{
+class core_vulkan_state_t : public wf::custom_data_t
+{
+  public:
+    std::shared_ptr<wf::vk::graphics_pipeline_t> pipeline;
+};
+
+
+core_vulkan_state_t& core_ensure_vk(wf::vulkan_render_state_t& state)
+{
+    if (auto data = state.get_data<core_vulkan_state_t>())
+    {
+        return *data;
+    }
+
+    auto cs = state.get_context()->load_shader_module(
+        rounded_comp_data, sizeof(rounded_comp_data));
+
+
+    wf::vk::pipeline_params_t params{};
+    params.shaders = {
+        {.stage = VK_SHADER_STAGE_COMPUTE_BIT, .shader = cs},
+    };
+
+    // One descriptor set for the uv texture.
+    params.descriptor_set_layouts = {wf::vk::pipeline_params_t::texture_descriptor_set_t{}};
+    params.push_constants = {
+        VkPushConstantRange{
+            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
+            .offset     = 0,
+            .size = sizeof(vkdecor_vulkan_push_data_t),
+        },
+    };
+
+    auto data = std::make_unique<core_vulkan_state_t>();
+    data->pipeline = std::make_shared<wf::vk::graphics_pipeline_t>(state.get_context(), params);
+    auto ptr = data.get();
+    state.store_data<core_vulkan_state_t>(std::move(data));
+    return *ptr;
+}
+}
+/*********************************END of VUlkan init class****************************************************/		
+	
 namespace vkdecor
 {
+
+
 
 static const char *rounded_corner_overlay =
     R"(
@@ -132,8 +180,6 @@ void main() {
 }
 
 )";
-
-
 
 void setup_shader(GLuint *program, std::string source)
 {
@@ -248,20 +294,6 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
 
     int radius = shadow_radius;
     LOGI("step_effect: ", rectangle.width);
-
-    wf::gles::run_in_context_if_gles([&]
-    {
-        wf::gles::bind_render_buffer(data.target);
-            
-            saved_width  = rectangle.width;
-            saved_height = rectangle.height;
-
-            recreate_textures(rectangle);
-
-        GL_CALL(glActiveTexture(GL_TEXTURE0 + 0));
-        GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
-        GL_CALL(glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F));
-
         const wf::geometry_t nonshadow_rect = wf::geometry_t{
             radius* 2,
             radius * 2,
@@ -280,6 +312,21 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
         border_region ^= inner_part;
         border_region.expand_edges(1);
         border_region &= nonshadow_rect;
+            
+        saved_width  = rectangle.width;
+        saved_height = rectangle.height;        
+       
+/****** RUN_GLES_effect***********************************************************************************/
+    wf::gles::run_in_context_if_gles([&]
+    {
+        wf::gles::bind_render_buffer(data.target);
+
+
+            recreate_textures(rectangle);
+
+        GL_CALL(glActiveTexture(GL_TEXTURE0 + 0));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
+        GL_CALL(glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F));
 
 		if (std::string(overlay_engine) != "none")
         {
@@ -310,10 +357,27 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
 
         GL_CALL(glUseProgram(0));
     });
+/********************************END_GLES_code************************************************************/
+/********************************Vulkan*******************************************************************/
+    if (!(wf::get_core().is_gles2()))
+	{
+shader_uniforms.title_height = title_height + border_size + radius * 2;
+shader_uniforms.border_size = border_size + radius * 2;
+shader_uniforms.width = rectangle.width; 
+shader_uniforms.height = rectangle.height;
+shader_uniforms.corner_radius = rounded_corner_radius;
+shader_uniforms.shadow_radius = radius; 
+//shader_uniforms.shadow_color = shadow_color; 
+    LOGI("colora: ", wf::color_t(shadow_color).a );
+	}
+/********************************end Vulkan***************************************************************/
 }
 
 void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geometry_t rectangle)
 {
+/****************************GLES code********************************************************************/
+    if (wf::get_core().is_gles2())
+	{	
     OpenGL::render_transformed_texture(wf::gles_texture_t{texture}, rectangle,
         wf::gles::render_target_orthographic_projection(data.target), glm::vec4{1},
         OpenGL::TEXTURE_TRANSFORM_INVERT_Y | OpenGL::RENDER_FLAG_CACHED);
@@ -326,7 +390,18 @@ void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geo
         }
     });
 
-    OpenGL::clear_cached();    
+    OpenGL::clear_cached();
+	}
+/***************************Vulkan code**********************************************************************/
+    if (!(wf::get_core().is_gles2()))
+	{
+		    LOGI("step_effect: ", shader_uniforms.width);
+		        data.pass->custom_vulkan_subpass([&] (wf::vulkan_render_state_t& state, vk::command_buffer_t& cmd_buf)
+        {
+            auto& vk_state = vk::core_ensure_vk(state);
+		});
+		
+	}
 }
 
 void smoke_t::effect_updated()

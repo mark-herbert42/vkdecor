@@ -5,9 +5,24 @@
 #include <map>
 #include <GLES3/gl32.h>
 #include <wayfire/scene-render.hpp>
+#include <wayfire/vulkan.hpp>
+#include "../shaders/rounded.comp.h"
 
 namespace wf
 {
+namespace vk
+{
+struct vkdecor_vulkan_push_data_t
+{
+		int title_height;
+		int border_size;
+		int width;
+		int height;
+		int corner_radius;
+		int shadow_radius;
+		glm::vec4 shadow_color;
+};	
+}
 namespace vkdecor
 {
 class smoke_t
@@ -17,11 +32,11 @@ class smoke_t
         texture;
 
     int saved_width = -1, saved_height = -1;
+    vk::vkdecor_vulkan_push_data_t shader_uniforms;
 
     wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
     wf::option_wrapper_t<int> rounded_corner_radius{"vkdecor/rounded_corner_radius"};
     wf::option_wrapper_t<wf::color_t> shadow_color{"vkdecor/shadow_color"};
-
   public:
     smoke_t();
     ~smoke_t();
