@@ -38,6 +38,7 @@ namespace wf
 {
 	
 /**************************************************Vulkan init class **************************************************/
+#if WF_HAS_VULKANFX
 namespace vk
 {
 class core_vulkan_state_t : public wf::custom_data_t
@@ -81,6 +82,7 @@ core_vulkan_state_t& core_ensure_vk(wf::vulkan_render_state_t& state)
 }
 }
 /*********************************END of VUlkan init class****************************************************/		
+#endif
 	
 namespace vkdecor
 {
@@ -286,12 +288,15 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
     {
         return;
     }
-    
-    if ((rectangle.width == saved_width) && (rectangle.height == saved_height))
+            if ((rectangle.width == saved_width) && (rectangle.height == saved_height) && (decor_color == saved_color) )
     {
-        return;
-    }   
-
+			return;
+	}	
+    
+            saved_width  = rectangle.width;
+            saved_height = rectangle.height;
+            saved_color = decor_color;
+            
     int radius = shadow_radius;
     LOGI("step_effect: ", rectangle.width);
         const wf::geometry_t nonshadow_rect = wf::geometry_t{
@@ -308,22 +313,18 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
             rectangle.height - border_size * 2 - title_height - radius * 4,
         };
 
-        wf::region_t border_region = nonshadow_rect;
-        border_region ^= inner_part;
+        wf::region_t border_region = wf::to_integer_box(nonshadow_rect);
+        border_region ^= wf::to_integer_box(inner_part);
         border_region.expand_edges(1);
-        border_region &= nonshadow_rect;
-            
-        saved_width  = rectangle.width;
-        saved_height = rectangle.height;        
+        border_region &= wf::to_integer_box(nonshadow_rect);      
        
 /****** RUN_GLES_effect***********************************************************************************/
     wf::gles::run_in_context_if_gles([&]
     {
         wf::gles::bind_render_buffer(data.target);
-
-
+   
             recreate_textures(rectangle);
-
+            
         GL_CALL(glActiveTexture(GL_TEXTURE0 + 0));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
         GL_CALL(glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F));
@@ -359,6 +360,7 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
     });
 /********************************END_GLES_code************************************************************/
 /********************************Vulkan*******************************************************************/
+#if WF_HAS_VULKANFX
     if (!(wf::get_core().is_gles2()))
 	{
 shader_uniforms.title_height = title_height + border_size + radius * 2;
@@ -370,6 +372,7 @@ shader_uniforms.shadow_radius = radius;
 //shader_uniforms.shadow_color = shadow_color; 
     LOGI("colora: ", wf::color_t(shadow_color).a );
 	}
+#endif
 /********************************end Vulkan***************************************************************/
 }
 
@@ -385,7 +388,7 @@ void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geo
     {
         for (auto& box : data.damage)
         {
-            wf::gles::render_target_logic_scissor(data.target, wlr_box_from_pixman_box(box));
+            wf::gles::render_target_logic_scissor(data.target, box);
             OpenGL::draw_cached();
         }
     });
@@ -393,6 +396,7 @@ void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geo
     OpenGL::clear_cached();
 	}
 /***************************Vulkan code**********************************************************************/
+#if WF_HAS_VULKANFX
     if (!(wf::get_core().is_gles2()))
 	{
 		    LOGI("step_effect: ", shader_uniforms.width);
@@ -402,6 +406,7 @@ void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geo
 		});
 		
 	}
+#endif
 }
 
 void smoke_t::effect_updated()

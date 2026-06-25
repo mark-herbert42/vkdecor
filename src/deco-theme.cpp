@@ -7,6 +7,8 @@
 
 namespace wf
 {
+
+
 namespace vkdecor
 {
 wf::option_wrapper_t<int> border_size{"vkdecor/border_size"};
@@ -120,7 +122,7 @@ void vkdecor_theme_t::render_background(const wf::scene::render_instruction_t& d
 
             for (auto& box : data.damage)
             {
-                 data.pass->add_rect(get_decor_color(active), data.target, rectangle, wlr_box_from_pixman_box(box));
+                 data.pass->add_rect(get_decor_color(active), data.target, rectangle, geometry_from_pixman_box(box));
             }
     } else
     {
