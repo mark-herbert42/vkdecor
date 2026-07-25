@@ -8,7 +8,6 @@
 #include <wayfire/vulkan.hpp>
 #include "../shaders/rounded.comp.h"
 
-
 namespace wf
 {
 namespace vk
@@ -32,8 +31,7 @@ class smoke_t
     GLuint render_overlay_program,
         texture;
 
-    int saved_width = -1, saved_height = -1; 
-    wf::color_t saved_color; 
+    int saved_width = -1, saved_height = -1;
     vk::vkdecor_vulkan_push_data_t shader_uniforms;
 
     wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
