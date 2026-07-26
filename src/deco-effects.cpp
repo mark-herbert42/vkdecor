@@ -289,10 +289,14 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
         return;
     }
     
-    if ((rectangle.width == saved_width) && (rectangle.height == saved_height))
+    if ((rectangle.width == saved_width) && (rectangle.height == saved_height) && (decor_color == saved_color))
     {
         return;
     }   
+    
+            saved_width  = rectangle.width;
+            saved_height = rectangle.height;
+            saved_color = decor_color;
 
     int radius = shadow_radius;
     LOGI("step_effect: ", rectangle.width);

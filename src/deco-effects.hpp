@@ -32,6 +32,7 @@ class smoke_t
         texture;
 
     int saved_width = -1, saved_height = -1;
+    wf::color_t saved_color; 
     vk::vkdecor_vulkan_push_data_t shader_uniforms;
 
     wf::option_wrapper_t<std::string> overlay_engine{"vkdecor/overlay_engine"};
