@@ -15,10 +15,17 @@ add_project_arguments(['-DWLR_USE_UNSTABLE'], language: ['cpp', 'c'])
 add_project_arguments(['-DWAYFIRE_PLUGIN'], language: ['cpp', 'c'])
 add_project_link_arguments(['-rdynamic','-fPIC'], language:'cpp')
 
+if get_option('vulkan_effects')
+  add_project_arguments(['-DWF_HAS_VULKANFX=1'], language: ['cpp', 'c'])
+else
+  add_project_arguments(['-DWF_HAS_VULKANFX=0'], language: ['cpp', 'c'])
+endif
+
 wayfire = dependency('wayfire', version: '>=0.11.0')
+
 glm    = dependency('glm')
 
+subdir('shaders')
 subdir('src')
 subdir('metadata')
 subdir('locale')
-subdir('shaders')
