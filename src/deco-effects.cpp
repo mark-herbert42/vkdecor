@@ -427,11 +427,33 @@ void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geo
     if (!(wf::get_core().is_gles2()))
 	{
 		    LOGI("step_effect: ", shader_uniforms.width);
-		        data.pass->custom_vulkan_subpass([&] (wf::vulkan_render_state_t& state, vk::command_buffer_t& cmd_buf)
+        data.pass->custom_vulkan_subpass([&] (wf::vulkan_render_state_t& state, vk::command_buffer_t& cmd_buf)
         {
             auto& vk_state = vk::core_ensure_vk(state);
-		});
-		
+
+			
+			auto texture   = get_texture(data.target.scale);
+            auto tex_dset  = state.get_descriptor_pool()->get_descriptor_set(cmd_buf, texture);
+            wf::vk::texture_sampling_params_t sampling{texture};
+            wf::vk::pipeline_specialization_t specialization{};
+            specialization.add_specialization_for_texture(texture);
+
+
+            auto [layout, _] = cmd_buf.bind_pipeline(vk_state.pipeline, data.target, specialization);
+            cmd_buf.set_full_viewport(data.target);
+            cmd_buf.bind_texture(texture);
+
+            vkCmdBindDescriptorSets(cmd_buf, VK_PIPELINE_BIND_POINT_GRAPHICS, layout,
+                0, 1, &tex_dset, 0, nullptr);
+
+            vkCmdPushConstants(cmd_buf, layout, VK_SHADER_STAGE_COMPUTE_BIT,
+                0, sizeof(vk::vkdecor_vulkan_push_data_t), &shader_uniforms);
+
+            cmd_buf.for_each_scissor_rect(data.target, (data.damage & data.target.geometry), [&]
+            {
+                vkCmdDraw(cmd_buf, 4, 1, 0, 0);
+            });
+        });
 	}
 #endif
 }
