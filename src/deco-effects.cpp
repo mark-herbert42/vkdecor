@@ -93,8 +93,6 @@ static const char *rounded_corner_overlay =
     R"(
 #version 320 es
 
-// Separated bindings to prevent read/write driver race conditions
-layout(binding = 0, rgba32f) readonly uniform highp image2D in_tex;
 layout(binding = 0, rgba32f) writeonly uniform highp image2D out_tex;
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
@@ -106,6 +104,7 @@ layout(location = 6) uniform int height;
 layout(location = 7) uniform int corner_radius;
 layout(location = 8) uniform int shadow_radius;
 layout(location = 9) uniform vec4 shadow_color;
+layout(location = 10) uniform vec4 border_color;
 
 void main() {
     ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
@@ -124,7 +123,7 @@ void main() {
 
     float d;
     vec4 e = shadow_color;
-    vec4 c = imageLoad(in_tex, pos);
+    vec4 c = border_color;
     vec4 m = vec4(0.0);
     vec4 s;
     float diffuse = 1.0 / float(shadow_radius == 0 ? 1 : shadow_radius);
@@ -372,11 +371,17 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
             GL_CALL(glUniform1i(5, rectangle.width));
             GL_CALL(glUniform1i(6, rectangle.height));
             GL_CALL(glUniform1i(7, rounded_corner_radius));
-                GLfloat shadow_color_f[4] =
+            GLfloat shadow_color_f[4] =
                 {GLfloat(wf::color_t(shadow_color).r), GLfloat(wf::color_t(shadow_color).g),
                     GLfloat(wf::color_t(shadow_color).b), GLfloat(wf::color_t(shadow_color).a)};
                 GL_CALL(glUniform1i(8, radius));
                 GL_CALL(glUniform4fv(9, 1, shadow_color_f));
+            GLfloat border_color_f[4] =
+                {GLfloat(wf::color_t(decor_color).r), GLfloat(wf::color_t(decor_color).g),
+                    GLfloat(wf::color_t(decor_color).b), GLfloat(wf::color_t(decor_color).a)};
+                GL_CALL(glUniform1i(8, radius));
+                GL_CALL(glUniform4fv(9, 1, shadow_color_f));
+                GL_CALL(glUniform4fv(10, 1, border_color_f));               
             GL_CALL(glDispatchCompute(round_up_div(rectangle.width, 16), round_up_div(rectangle.height, 16),
                 1));
             GL_CALL(glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT));
