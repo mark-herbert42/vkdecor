@@ -10,7 +10,7 @@ But for now trying to make minimal functionality of server side deocorations to 
 
 The plan is to keep only  antialiased rounded corners with shadows effects droping the most advanced eye-candy.
 
-Currently only basic decoration works/
+Vulkan rounding corners/shadows effect  finally added and works at least for me. 
 
 ## Installing
 

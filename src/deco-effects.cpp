@@ -37,52 +37,6 @@
 namespace wf
 {
 	
-/**************************************************Vulkan init class **************************************************/
-#if WF_HAS_VULKANFX
-namespace vk
-{
-class core_vulkan_state_t : public wf::custom_data_t
-{
-  public:
-    std::shared_ptr<wf::vk::graphics_pipeline_t> pipeline;
-};
-
-
-core_vulkan_state_t& core_ensure_vk(wf::vulkan_render_state_t& state)
-{
-    if (auto data = state.get_data<core_vulkan_state_t>())
-    {
-        return *data;
-    }
-
-    auto cs = state.get_context()->load_shader_module(
-        rounded_comp_data, sizeof(rounded_comp_data));
-
-
-    wf::vk::pipeline_params_t params{};
-    params.shaders = {
-        {.stage = VK_SHADER_STAGE_COMPUTE_BIT, .shader = cs},
-    };
-
-    // One descriptor set for the uv texture.
-    params.descriptor_set_layouts = {wf::vk::pipeline_params_t::texture_descriptor_set_t{}};
-    params.push_constants = {
-        VkPushConstantRange{
-            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
-            .offset     = 0,
-            .size = sizeof(vkdecor_vulkan_push_data_t),
-        },
-    };
-
-    auto data = std::make_unique<core_vulkan_state_t>();
-    data->pipeline = std::make_shared<wf::vk::graphics_pipeline_t>(state.get_context(), params);
-    auto ptr = data.get();
-    state.store_data<core_vulkan_state_t>(std::move(data));
-    return *ptr;
-}
-}
-/*********************************END of VUlkan init class****************************************************/		
-#endif
 	
 namespace vkdecor
 {
@@ -207,6 +161,87 @@ void main() {
 }
 
 )";
+
+#if WF_HAS_VULKANFX
+    class vulkan_state_t : public wf::custom_data_t
+    {
+      public:
+        std::shared_ptr<wf::vk::graphics_pipeline_t> pipeline;
+    };
+
+
+
+vulkan_state_t& ensure_vk(wf::vulkan_render_state_t& state)
+{
+
+    if (auto data = state.get_data<vulkan_state_t>())
+    {
+        return *data;
+    }
+
+
+auto vs = state.get_context()->load_shader_module(
+    rounded_corner_vert_data, sizeof(rounded_corner_vert_data));
+auto fs = state.get_context()->load_shader_module(
+    rounded_corner_frag_data, sizeof(rounded_corner_frag_data));
+
+
+    wf::vk::pipeline_params_t params{};
+
+wf::vk::pipeline_shader_t vs_shader{};
+vs_shader.stage  = VK_SHADER_STAGE_VERTEX_BIT;
+vs_shader.shader = vs;
+params.shaders.push_back(vs_shader);
+
+wf::vk::pipeline_shader_t fs_shader{};
+fs_shader.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
+fs_shader.shader = fs;
+params.shaders.push_back(fs_shader);
+
+
+        params.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        params.vertex_input_description = {{
+            .binding   = 0,
+            .stride    = sizeof(float) * 4,   // pos.xy + uv.xy
+            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+        }};
+        params.vertex_attribute_description = {
+            {.location = 0, .binding = 0, .format = VK_FORMAT_R32G32_SFLOAT, .offset = 0},
+            {.location = 1, .binding = 0, .format = VK_FORMAT_R32G32_SFLOAT, .offset = sizeof(float) * 2},
+        };
+
+        // Use fragment shader instead of texture
+
+        params.descriptor_set_layouts = {};
+        params.push_constants = {{
+            .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            .offset     = 0,
+            .size       = sizeof(push_constants_t),
+        }};
+
+        auto data = std::make_unique<vulkan_state_t>();
+        data->pipeline = std::make_shared<wf::vk::graphics_pipeline_t>(state.get_context(), params);
+        auto ptr = data.get();
+        state.store_data<vulkan_state_t>(std::move(data));
+        return *ptr;
+}
+
+std::shared_ptr<wf::vk::gpu_buffer_t> smoke_t::find_buffer(
+    std::shared_ptr<wf::vk::context_t> ctx, VkDeviceSize total_size)
+{
+    auto& buffer = vulkan_vertex_buffer;
+
+    // Buffer reuse -  like wobbly.cpp
+    if (buffer && (buffer->get_size() >= total_size) && (buffer.use_count() == 1))
+    {
+        return buffer;
+    }
+
+    buffer = ctx->create_buffer(total_size,
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+    return buffer;
+}
+#endif
 
 void setup_shader(GLuint *program, std::string source)
 {
@@ -342,8 +377,27 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
         border_region ^= wf::to_integer_box(inner_part);
         border_region.expand_edges(1);
         border_region &= wf::to_integer_box(nonshadow_rect);      
-       
-/****** RUN_GLES_effect***********************************************************************************/
+ 
+#if WF_HAS_VULKANFX
+    push_constants.shadow_color = glm::vec4(
+        wf::color_t(shadow_color).r,
+        wf::color_t(shadow_color).g,
+        wf::color_t(shadow_color).b,
+        wf::color_t(shadow_color).a);
+    push_constants.border_color = glm::vec4(
+        wf::color_t(decor_color).r,
+        wf::color_t(decor_color).g,
+        wf::color_t(decor_color).b,
+        wf::color_t(decor_color).a);
+    push_constants.title_height  = title_height + border_size + radius * 2;
+    push_constants.border_size   = border_size + radius * 2;
+    push_constants.width         = rectangle.width;
+    push_constants.height        = rectangle.height;
+    push_constants.corner_radius = rounded_corner_radius;
+    push_constants.shadow_radius = radius;
+#endif
+
+      
     wf::gles::run_in_context_if_gles([&]
     {
         wf::gles::bind_render_buffer(data.target);
@@ -389,30 +443,14 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
 
         GL_CALL(glUseProgram(0));
     });
-/********************************END_GLES_code************************************************************/
-/********************************Vulkan*******************************************************************/
-#if WF_HAS_VULKANFX
-    if (!(wf::get_core().is_gles2()))
-	{
-shader_uniforms.title_height = title_height + border_size + radius * 2;
-shader_uniforms.border_size = border_size + radius * 2;
-shader_uniforms.width = rectangle.width; 
-shader_uniforms.height = rectangle.height;
-shader_uniforms.corner_radius = rounded_corner_radius;
-shader_uniforms.shadow_radius = radius; 
-shader_uniforms.shadow_color = {GLfloat(wf::color_t(shadow_color).r), GLfloat(wf::color_t(shadow_color).g),
-                    GLfloat(wf::color_t(shadow_color).b), GLfloat(wf::color_t(shadow_color).a)}; 
-    LOGI("colora: ", wf::color_t(shadow_color).a );
-	}
-#endif
-/********************************end Vulkan***************************************************************/
 }
 
 void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geometry_t rectangle)
 {
-/****************************GLES code********************************************************************/
     if (wf::get_core().is_gles2())
 	{	
+    LOGE("VKDECOR render effect");
+
     OpenGL::render_transformed_texture(wf::gles_texture_t{texture}, rectangle,
         wf::gles::render_target_orthographic_projection(data.target), glm::vec4{1},
         OpenGL::TEXTURE_TRANSFORM_INVERT_Y | OpenGL::RENDER_FLAG_CACHED);
@@ -427,18 +465,59 @@ void smoke_t::render_effect(const wf::scene::render_instruction_t& data, wf::geo
 
     OpenGL::clear_cached();
 	}
-/***************************Vulkan code**********************************************************************/
+else {
+
 #if WF_HAS_VULKANFX
-    if (!(wf::get_core().is_gles2()))
-	{
-		    LOGI("step_effect: ", shader_uniforms.width);
-		        data.pass->custom_vulkan_subpass([&] (wf::vulkan_render_state_t& state, vk::command_buffer_t& cmd_buf)
+
+
+LOGE("VKDECOR rectangle size: ", rectangle.x, "  ", rectangle.y);
+        data.pass->custom_vulkan_subpass([&] (wf::vulkan_render_state_t& state,
+                                              wf::vk::command_buffer_t& cmd_buf)
         {
-            auto& vk_state = vk::core_ensure_vk(state);
-		});
-		
-	}
+            auto& our_state = ensure_vk(state);
+
+            // Квад окна: позиции в координатах таргета, uv (0,0) — верхний левый угол
+            float x0 = (float)rectangle.x;
+            float y0 = (float)rectangle.y;
+            float x1 = (float)(rectangle.x + rectangle.width);
+            float y1 = (float)(rectangle.y + rectangle.height);
+
+            std::vector<float> unified_buffer = {
+                x0, y0, 0.0f, 0.0f,
+                x1, y0, 1.0f, 0.0f,
+                x0, y1, 0.0f, 1.0f,
+
+                x1, y0, 1.0f, 0.0f,
+                x1, y1, 1.0f, 1.0f,
+                x0, y1, 0.0f, 1.0f,
+            };
+
+            VkDeviceSize total_size = unified_buffer.size() * sizeof(float);
+            auto buffer = find_buffer(state.get_context(), total_size);
+            buffer->write(unified_buffer.data(), total_size);
+
+            auto [layout, _] = cmd_buf.bind_pipeline(our_state.pipeline, data.target,
+                wf::vk::pipeline_specialization_t{});
+            cmd_buf.set_full_viewport(data.target);
+
+            push_constants.mvp           = wf::vk::render_target_transform(data.target);
+          
+            vkCmdPushConstants(cmd_buf, layout,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                0, sizeof(push_constants_t), &push_constants);
+
+            cmd_buf.bind_buffer(buffer);
+            VkDeviceSize offset = 0;
+            vkCmdBindVertexBuffers(cmd_buf, 0, 1, &buffer->get_buffer(), &offset);
+
+            cmd_buf.for_each_scissor_rect(data.target, (data.damage & data.target.geometry), [&]
+            {
+                vkCmdDraw(cmd_buf, 6, 1, 0, 0);
+            });
+        });
 #endif
+
+}
 }
 
 void smoke_t::effect_updated()
