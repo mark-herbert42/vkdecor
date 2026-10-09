@@ -22,15 +22,16 @@ layout(location = 0) out vec4 out_color;
 void main()
 {
     vec4 out_c;
-    // Пиксель внутри прямоугольника окна (uv 0..1 по ширине/высоте)
+    // Coords within window rectancle (uv 0..1 )
     ivec2 pos = ivec2(frag_uv * vec2(float(pc.width), float(pc.height)));
 
-    // Внутренняя область окна — цвет декора (в GL это давал glClear)
+    // Clear internal window area
     if (pos.x >= pc.border_size && pos.x <= (pc.width - 1) - pc.border_size &&
         pos.y >= pc.title_height && pos.y <= (pc.height - 1) - pc.border_size)
     {
    //     out_c = pc.border_color;
-out_color = vec4(transform_color(pc.border_color.rgb), pc.border_color.a);
+   //out_color = vec4(transform_color(pc.border_color.rgb), pc.border_color.a);
+        out_color = vec4(0.0);
         return;
     }
 
@@ -51,7 +52,7 @@ out_color = vec4(transform_color(pc.border_color.rgb), pc.border_color.a);
     int corner_top    = pc.shadow_radius * 2 + pc.corner_radius;
     int corner_bottom = (pc.height - 1) - (pc.shadow_radius * 2 + pc.corner_radius);
 
-    // --- УГЛЫ ---
+    // --- Corners ---
     if (pos.x < corner_left && pos.y < corner_top)
     {
         vec2 center = vec2(float(corner_left), float(corner_top));
@@ -84,7 +85,7 @@ out_color = vec4(transform_color(pc.border_color.rgb), pc.border_color.a);
         d = distance(center, vec2(pos));
         out_c = mix(c, s, clamp(d - float(pc.corner_radius), 0.0, 1.0));
     }
-    // --- ПРЯМЫЕ КРАЯ ---
+    // --- Edges ---
     else if (pos.x < left_edge_max && pos.y >= corner_top && pos.y <= corner_bottom)
     {
         d = distance(vec2(float(left_edge_max), float(pos.y)), vec2(pos));
@@ -107,7 +108,7 @@ out_color = vec4(transform_color(pc.border_color.rgb), pc.border_color.a);
     }
     else
     {
-        // Области, которые в GL не перезаписывались шейдером и оставались decor_color
+        // Decoration area between shadow and window area -  decor_color
         out_c = pc.border_color;
     }
 

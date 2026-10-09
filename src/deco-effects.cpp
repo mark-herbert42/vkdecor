@@ -28,6 +28,9 @@
  */
 
 
+#include <algorithm>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <wayfire/debug.hpp>
 #include <wayfire/render.hpp>
 
@@ -358,7 +361,6 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
             saved_color = decor_color;
             
     int radius = shadow_radius;
-    LOGI("step_effect: ", rectangle.width);
         const wf::geometry_t nonshadow_rect = wf::geometry_t{
             radius* 2,
             radius * 2,
@@ -395,9 +397,7 @@ void smoke_t::step_effect(const wf::scene::render_instruction_t& data, wf::geome
     push_constants.height        = rectangle.height;
     push_constants.corner_radius = rounded_corner_radius;
     push_constants.shadow_radius = radius;
-#endif
-
-      
+#endif 
     wf::gles::run_in_context_if_gles([&]
     {
         wf::gles::bind_render_buffer(data.target);
@@ -470,17 +470,41 @@ else {
 #if WF_HAS_VULKANFX
 
 
-LOGE("VKDECOR rectangle size: ", rectangle.x, "  ", rectangle.y);
         data.pass->custom_vulkan_subpass([&] (wf::vulkan_render_state_t& state,
                                               wf::vk::command_buffer_t& cmd_buf)
         {
             auto& our_state = ensure_vk(state);
 
-            // Квад окна: позиции в координатах таргета, uv (0,0) — верхний левый угол
-            float x0 = (float)rectangle.x;
-            float y0 = (float)rectangle.y;
-            float x1 = (float)(rectangle.x + rectangle.width);
-            float y1 = (float)(rectangle.y + rectangle.height);
+            // Repeat the logic of wayfire core (render_pass_t::add_texture): geometry
+            // is converted  to  dst_box in framebuffer pixels, which do
+            // correctly process scale, wl_transform and subbuffers (expo).
+            // MVP — just tramslating pixels into  NDC Vulkan
+            // (Y inverted, equivalent to  non-aligned render_target_transform
+            // for target withou  wl-transformation).
+            const auto dst_box =
+                data.target.framebuffer_texture_dst_box_from_geometry_box(rectangle);
+
+            float x0 = (float)dst_box.x;
+            float y0 = (float)dst_box.y;
+            float x1 = (float)(dst_box.x + dst_box.width);
+            float y1 = (float)(dst_box.y + dst_box.height);
+
+            const auto fb_size = data.target.get_size();
+            const float fb_w = (float)fb_size.width;
+            const float fb_h = (float)fb_size.height;
+
+            // Pixels -> NDC. Y is directed UPWARDS (GL-like convention of wlr-pass,
+            // wlroots use inverted vieport), so pixel 
+            // line  0 (top of the screen) -> NDC -1.  Usinhg pore
+            // Vulkan-convention Y-downwards made vertical mirroring,
+            // not affecting full target coverage , but breaking sub-areas.
+            glm::mat4 mvp = glm::mat4(1.0);
+            mvp[0][0] = 2.0f / fb_w;
+            mvp[1][1] = 2.0f / fb_h;
+            mvp[3][0] = -1.0f;
+            mvp[3][1] = -1.0f;
+
+            push_constants.mvp = mvp;
 
             std::vector<float> unified_buffer = {
                 x0, y0, 0.0f, 0.0f,
@@ -500,8 +524,6 @@ LOGE("VKDECOR rectangle size: ", rectangle.x, "  ", rectangle.y);
                 wf::vk::pipeline_specialization_t{});
             cmd_buf.set_full_viewport(data.target);
 
-            push_constants.mvp           = wf::vk::render_target_transform(data.target);
-          
             vkCmdPushConstants(cmd_buf, layout,
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0, sizeof(push_constants_t), &push_constants);
