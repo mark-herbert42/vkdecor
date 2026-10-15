@@ -481,13 +481,6 @@ else {
             // MVP — just tramslating pixels into  NDC Vulkan
             // (Y inverted, equivalent to  non-aligned render_target_transform
             // for target withou  wl-transformation).
-            const auto dst_box =
-                data.target.framebuffer_texture_dst_box_from_geometry_box(rectangle);
-
-            float x0 = (float)dst_box.x;
-            float y0 = (float)dst_box.y;
-            float x1 = (float)(dst_box.x + dst_box.width);
-            float y1 = (float)(dst_box.y + dst_box.height);
 
             const auto fb_size = data.target.get_size();
             const float fb_w = (float)fb_size.width;
@@ -506,14 +499,33 @@ else {
 
             push_constants.mvp = mvp;
 
-            std::vector<float> unified_buffer = {
-                x0, y0, 0.0f, 0.0f,
-                x1, y0, 1.0f, 0.0f,
-                x0, y1, 0.0f, 1.0f,
+            // Translate corners of logical rectangle through 
+            // framebuffer transorm (asк add_texture process
+            // window insides): scale + wl_transform  +
+            // subbuffer. 
+            auto map_corner = [&] (int x, int y)
+            {
+                auto p = data.target.framebuffer_geometry_from_geometry_box(
+                    wf::geometry_t{x, y, 0, 0});
+                return glm::vec2{(float)p.x, (float)p.y};
+            };
 
-                x1, y0, 1.0f, 0.0f,
-                x1, y1, 1.0f, 1.0f,
-                x0, y1, 0.0f, 1.0f,
+            glm::vec2 tl = map_corner(rectangle.x, rectangle.y);
+            glm::vec2 tr = map_corner(rectangle.x + rectangle.width, rectangle.y);
+            glm::vec2 bl = map_corner(rectangle.x, rectangle.y + rectangle.height);
+            glm::vec2 br = map_corner(rectangle.x + rectangle.width,
+                rectangle.y + rectangle.height);
+
+            // uv (0,0) — top left corner,
+            // attached to logical top of the decor.
+            std::vector<float> unified_buffer = {
+                tl.x, tl.y, 0.0f, 0.0f,
+                tr.x, tr.y, 1.0f, 0.0f,
+                bl.x, bl.y, 0.0f, 1.0f,
+
+                tr.x, tr.y, 1.0f, 0.0f,
+                br.x, br.y, 1.0f, 1.0f,
+                bl.x, bl.y, 0.0f, 1.0f,
             };
 
             VkDeviceSize total_size = unified_buffer.size() * sizeof(float);
