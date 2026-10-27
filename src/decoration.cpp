@@ -179,8 +179,15 @@ class wayfire_vkdecor : public wf::plugin_interface_t
                     continue;
                 }
 
-                remove_decoration(toplevel);
-                adjust_new_decorations(toplevel);
+                auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
+                auto& pending = toplevel->toplevel()->pending();
+                
+                pending.geometry = wf::shrink_geometry_by_margins(pending.geometry, pending.margins);
+                
+                deco->update_decoration_size();
+                pending.margins = deco->get_margins(pending);
+                pending.geometry = wf::expand_geometry_by_margins(pending.geometry, pending.margins);
+                
                 wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         });
@@ -305,9 +312,15 @@ class wayfire_vkdecor : public wf::plugin_interface_t
                     continue;
                 }
 
-                view->damage();
-                remove_decoration(toplevel);
-                adjust_new_decorations(toplevel);
+                auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
+                auto& pending = toplevel->toplevel()->pending();
+                
+                pending.geometry = wf::shrink_geometry_by_margins(pending.geometry, pending.margins);
+                
+                deco->update_decoration_size();
+                pending.margins = deco->get_margins(pending);
+                pending.geometry = wf::expand_geometry_by_margins(pending.geometry, pending.margins);
+                
                 wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         });
@@ -322,9 +335,15 @@ class wayfire_vkdecor : public wf::plugin_interface_t
                     continue;
                 }
 
-                view->damage();
-                remove_decoration(toplevel);
-                adjust_new_decorations(toplevel);
+                auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
+                auto& pending = toplevel->toplevel()->pending();
+                
+                pending.geometry = wf::shrink_geometry_by_margins(pending.geometry, pending.margins);
+                
+                deco->update_decoration_size();
+                pending.margins = deco->get_margins(pending);
+                pending.geometry = wf::expand_geometry_by_margins(pending.geometry, pending.margins);
+                
                 wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
         });
@@ -414,8 +433,15 @@ class wayfire_vkdecor : public wf::plugin_interface_t
                     continue;
                 }
 
-                remove_decoration(toplevel);
-                adjust_new_decorations(toplevel);
+                auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
+                auto& pending = toplevel->toplevel()->pending();
+                
+                pending.geometry = wf::shrink_geometry_by_margins(pending.geometry, pending.margins);
+                
+                deco->update_decoration_size();
+                pending.margins = deco->get_margins(pending);
+                pending.geometry = wf::expand_geometry_by_margins(pending.geometry, pending.margins);
+                
                 wf::vkdecor::schedule_transaction(toplevel->toplevel());
             }
 
@@ -443,17 +469,18 @@ class wayfire_vkdecor : public wf::plugin_interface_t
                 continue;
             }
 
+            auto deco = toplevel->toplevel()->get_data<simple_decorator_t>();
+            
             if (std::string(overlay_engine) == "rounded_corners")
             {
-                pending.margins =
-                {int(shadow_radius) * 2, int(shadow_radius) * 2,
-                    int(shadow_radius) * 2, int(shadow_radius) * 2};
+                pending.geometry = wf::shrink_geometry_by_margins(pending.geometry, pending.margins);
+                
+                pending.margins = deco->get_margins(toplevel->toplevel()->pending());
                 pending.geometry = wf::expand_geometry_by_margins(pending.geometry, pending.margins);
             } else
             {
                 pending.geometry = wf::shrink_geometry_by_margins(pending.geometry, pending.margins);
-                pending.margins  = toplevel->toplevel()->get_data<simple_decorator_t>()->get_margins(
-                    toplevel->toplevel()->pending());
+                pending.margins  = deco->get_margins(toplevel->toplevel()->pending());
                 pending.geometry = wf::expand_geometry_by_margins(pending.geometry, pending.margins);
             }
 
